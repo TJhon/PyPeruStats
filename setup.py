@@ -21,8 +21,8 @@ setup(
     ],
     python_requires=">=3.8",
     install_requires=[
-        "pandas>=1.0",
-        "requests>=2.0"
+        "pandas",
+        "requests"
     ],
     project_urls={
         "Bug Tracker": "https://github.com/TJhon/PyPeruStats/issues",
