@@ -1,10 +1,12 @@
 [tool.poetry]
 name = "pyperustats"
-version = "0.1.0"
-description = ""
-authors = ["Jhon Flores Rojas"]
-license = "Apache 2.0"
+version = "0.1.1"
+description = "Allows downloading data from various data sources in Peru."
+authors = ["Jhon K. Flores Rojas <fr.jhonk@gmail.com>"]
+license = "Apache-2.0"
 readme = "README.md"
+homepage = "https://github.com/TJhon/PyPeruStats"
+
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -14,12 +16,16 @@ fastparquet = "^2024.11.0"
 termcolor = "^2.5.0"
 numpy = "^2.2.0"
 pandas = "^2.2.3"
+ipykernel = "^6.29.5"
+bs4 = "^0.0.2"
+lxml = "^5.3.0"
 
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.5"
 matplotlib = "^3.10.0"
 setuptools = "^75.6.0"
+selenium = "^4.27.1"
 
 [build-system]
 requires = ["poetry-core"]
