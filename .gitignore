@@ -1,4 +1,7 @@
 test_data/
+data_inei/
+trash_zips/
+_update_data.py
 # Byte-compiled / optimized / DLL files
 __pycache__/
 trash/

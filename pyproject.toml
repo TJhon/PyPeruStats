@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyperustats"
-version = "0.1.1"
+version = "0.1.2"
 description = "Allows downloading data from various data sources in Peru."
 authors = ["Jhon K. Flores Rojas <fr.jhonk@gmail.com>"]
 license = "Apache-2.0"
