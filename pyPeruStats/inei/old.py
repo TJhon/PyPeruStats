@@ -61,11 +61,12 @@ class MICRODATOS_INEI:
         force=False,
         master_dir=None,
         remove_zip=False,
+        zip_dir="test_data",
         workers=1,
     ):
         start_time = time.time()
         if master_dir is None:
-            master_dir = f"./test_data/inei_{self.survey}_download"
+            master_dir = f"./{zip_dir}/inei_{self.survey}_download"
         self.master_dir = master_dir
 
         reference = self.filtered_data
