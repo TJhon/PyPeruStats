@@ -10,6 +10,13 @@ trash/
 cache/
 # C extensions
 *.so
+*.zip
+*.pdf
+*.dta
+*.dbf
+*.sav
+*.csv
+*.xlsx
 
 pyPeruStatsa/dir/enaho
 
