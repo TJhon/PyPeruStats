@@ -1,5 +1,5 @@
 import json
-from pyPeruStats.MTC.homologacion import TelMTC
+from pyPeruStatsa.MTC.homologacion import TelMTC
 
 ## MTC
 

@@ -1,4 +1,4 @@
-from pyPeruStats import clean_names
+from pyPeruStatsa import clean_names
 import pandas as pd
 enaho_metadata = 'https://raw.githubusercontent.com/TJhon/PyPeruStats/refs/heads/inei/MetadataSources/INEI/enaho_actualizado.csv'
 

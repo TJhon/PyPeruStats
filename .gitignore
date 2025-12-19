@@ -11,6 +11,8 @@ cache/
 # C extensions
 *.so
 
+pyPeruStatsa/dir/enaho
+
 # Distribution / packaging
 .Python
 build/
