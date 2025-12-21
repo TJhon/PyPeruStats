@@ -8,6 +8,18 @@ from tqdm import tqdm
 from joblib import Parallel, delayed
 from bs4 import BeautifulSoup
 
+
+import unicodedata
+import re
+
+def slugify(text: str) -> str:
+    """Convierte texto a formato seguro para nombres de archivo sin tildes ni caracteres especiales."""
+    text = unicodedata.normalize("NFD", text)
+    text = "".join(c for c in text if unicodedata.category(c) != "Mn")  # elimina tildes
+    text = re.sub(r"[^\w\s\-]", "", text)  # elimina caracteres no alfanuméricos excepto guiones
+    text = re.sub(r"\s+", "_", text.strip())
+    return text.lower()
+
 # === FUNCIONES AUXILIARES (tus funciones mejoradas) ===
 
 def html_to_dataframe(html: str) -> pd.DataFrame:
@@ -158,7 +170,7 @@ class MicrodatosINEIFetcher:
 
     def download_zips(
         self,
-        formats: List[str] = ["stata", "spss", "csv", "dbf"],
+        formats: List[str] = ["stata", "spss", "csv"],
         force: bool = False,
         modules: List[int] = [],
         remove_zip: bool = False
@@ -170,15 +182,17 @@ class MicrodatosINEIFetcher:
         df = self.df_modules.copy()
         df["cod_modulo"] = df["cod_modulo"].astype(str).str.zfill(3)
         df = df.query('cod_modulo in @modules')
-
+        # print(df)
 
 
         for _, row in tqdm(df.iterrows(), total=len(df), desc="Descargando .zip"):
             # Elegir primer formato disponible
             url = None
             for fmt in formats:
+                # print(fmt)
                 if pd.notna(row[fmt]):
                     url = f"{BASE_URL}/{row[fmt]}"
+                    # print(url)
                     break
             if not url:
                 continue
@@ -189,11 +203,22 @@ class MicrodatosINEIFetcher:
             extract_to = self.unzipped_dir / f"{anio}_mod_{mod}"
 
             if force or not zip_path.exists():
-                import requests
-                resp = requests.get(url)
-                resp.raise_for_status()
-                with open(zip_path, "wb") as f:
-                    f.write(resp.content)
+                cmd = [
+                    "curl", "-s", "-L",
+                    url,
+
+                    "-o", zip_path,
+
+                    "-H", "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+                    "-H", "Accept-Language: es,en;q=0.9",
+                    "-H", "Connection: keep-alive"
+                ]
+                subprocess.run(cmd, check=True)
+                # import requests
+                # resp = requests.get(url)
+                # resp.raise_for_status()
+                # with open(zip_path, "wb") as f:
+                #     f.write(resp.content)
 
             if not extract_to.exists():
                 with zipfile.ZipFile(zip_path, "r") as z:
@@ -208,15 +233,15 @@ class MicrodatosINEIFetcher:
         order_by: Literal["modulo", "anio"] = "modulo",
         keep_original_names: bool = True,
         move_or_copy: Literal["move", "copy"] = "copy",
-        ext_documentation: List[str] = ["pdf"]
     ):
         os.makedirs(self.ordered_dir, exist_ok=True)
         move_fn = shutil.move if move_or_copy == "move" else shutil.copy2
-
-        # Recopilar archivos relevantes
         relevant_exts = {".csv", ".sav", ".dta", ".dbf"}
-        data = []
+        
+        # Agrupar archivos por destino para manejar colisiones
+        files_by_dest_folder = {}
 
+        # === Paso 1: recopilar archivos de datos ===
         for root, _, files in os.walk(self.unzipped_dir):
             for file in files:
                 ext = Path(file).suffix.lower()
@@ -232,61 +257,141 @@ class MicrodatosINEIFetcher:
                     continue
                 anio, cod_modulo = parts[0], parts[1]
 
-                # Encontrar nombre de módulo desde df
+                # Obtener nombre del módulo
                 mod_row = self.df_modules[
                     (self.df_modules["anio"] == int(anio)) &
                     (self.df_modules["cod_modulo"].astype(str).str.zfill(3) == cod_modulo)
                 ]
                 modulo_name = mod_row["modulo"].iloc[0] if not mod_row.empty else "Desconocido"
-                norm_name = normalize_modulo_name(modulo_name)
+                norm_modulo_name = slugify(modulo_name)
 
+                #  carpeta destino
                 if order_by == "modulo":
-                    folder = self.ordered_dir / "por_modulo" / f"{cod_modulo}_{norm_name}"
-                    out_name = f"{anio}{ext}"
-                else:
+                    folder = self.ordered_dir / "por_modulo" / f"{cod_modulo}_{norm_modulo_name}"
+                else:  # order_by == "anio"
                     folder = self.ordered_dir / "por_anio" / anio
-                    out_name = f"{cod_modulo}_{norm_name}{ext}"
 
-                os.makedirs(folder, exist_ok=True)
-                dest = folder / out_name
-                move_fn(full_path, dest)
-                data.append({"anio": anio, "cod_modulo": cod_modulo, "file": dest})
+                #  nombre base del archivo
+                if keep_original_names:
+                    base_name = file  # nombre original con extensión
+                    #  nuevo nombre no lleva número aún
+                    if order_by == "modulo":
+                        new_name = f"{anio}_{base_name}"
+                    else:
+                        new_name = f"{cod_modulo}_{base_name}"
+                else:
+                    # Si NO se mantienen nombres originales, usaremos el tamaño para ordenar más adelante
+                    base_name = file
+                    new_name = base_name  # se ajustará luego con _1, _2, etc.
 
-        # === Documentación (PDFs) ===
+                dest_path = folder / new_name
+                key = str(folder)
+
+                if key not in files_by_dest_folder:
+                    files_by_dest_folder[key] = []
+                files_by_dest_folder[key].append({
+                    "src": full_path,
+                    "dest_folder": folder,
+                    "original_name": base_name,
+                    "new_name_without_num": new_name,
+                    "size": full_path.stat().st_size
+                })
+
+        # Renombrar y mover archivos evitando colisiones 
+        for folder_key, file_list in files_by_dest_folder.items():
+            folder = Path(folder_key)
+            os.makedirs(folder, exist_ok=True)
+
+            if not keep_original_names:
+                # Ordenar por tamaño descendente (más pesado primero)
+                file_list.sort(key=lambda x: x["size"], reverse=True)
+                for idx, f in enumerate(file_list, start=1):
+                    name_parts = f["new_name_without_num"].rsplit(".", 1)
+                    if len(name_parts) == 2:
+                        base, ext = name_parts
+                        final_name = f"{base}_{idx}.{ext}"
+                    else:
+                        final_name = f"{f['new_name_without_num']}_{idx}"
+                    dest = folder / final_name
+                    move_fn(f["src"], dest)
+            else:
+                # Mantener nombres originales → detectar colisiones y evitar sobrescritura
+                name_count = {}
+                for f in file_list:
+                    name = f["new_name_without_num"]
+                    if name in name_count:
+                        name_count[name] += 1
+                        # Extraer base y ext
+                        name_parts = name.rsplit(".", 1)
+                        if len(name_parts) == 2:
+                            base, ext = name_parts
+                            new_name = f"{base}_{name_count[name]}.{ext}"
+                        else:
+                            new_name = f"{name}_{name_count[name]}"
+                    else:
+                        name_count[name] = 0
+                        new_name = name
+                    dest = folder / new_name.lower()
+                    move_fn(f["src"], dest)
+
+        #  Documentación (PDFs) 
         pdf_dir = self.ordered_dir / "documentacion"
         os.makedirs(pdf_dir, exist_ok=True)
-        seen = set()
+        seen_names = set()
+        pdf_files_by_root = {}
 
         for root, _, files in os.walk(self.unzipped_dir):
             for file in files:
                 if not file.lower().endswith(".pdf"):
                     continue
                 src = Path(root) / file
+                # Usamos el nombre base del archivo original
+                basename = file
                 size = src.stat().st_size
-                key = (file.lower(), size)
-                if key in seen:
+                key = (basename.lower(), size)
+
+                if key in seen_names:
                     continue
-                seen.add(key)
-                dest = pdf_dir / f"{src.parent.name}_{file}"
+                seen_names.add(key)
+
+                # extraer parte informativa del nombre de la carpeta padre
+                parent_name = src.parent.name  # ej: "2014_mod_001"
+                # Si el nombre del PDF ya contiene parte del parent, no duplicar
+                final_pdf_name = file
+                if parent_name not in file:
+                    # Agregar solo la parte que no está en el nombre
+                    final_pdf_name = f"{parent_name}_{file}"
+
+                dest = pdf_dir / final_pdf_name
+                # Evitar colisiones en documentación también
+                counter = 1
+                orig_dest = dest
+                while dest.exists():
+                    name_parts = orig_dest.name.rsplit(".", 1)
+                    if len(name_parts) == 2:
+                        base, ext = name_parts
+                        dest = pdf_dir / f"{base}_{counter}.{ext}"
+                    else:
+                        dest = pdf_dir / f"{orig_dest.name}_{counter}"
+                    counter += 1
                 move_fn(src, dest)
 
-        print(f"✅ Archivos organizados en: {self.ordered_dir}")
+        print(f"Archivos organizados en: {self.ordered_dir}")
         return self
-    
 
 if __name__ == "__main__":
     # Ejemplo: ENDES 2011-2013
-    # fetcher = MicrodatosINEIFetcher(
-    #     encuesta="endes",
-    #     years=[2011, 2013],
-    #     dir_master="./datos_inei",
-    #     n_jobs=2
-    # )
-    # fetcher.fetch_modules().download_zips(formats=["stata", "dbf"]).organize_files(
-    #     order_by="anio",
-    #     keep_original_names=True,
-    #     move_or_copy="copy"
-    # )
+    fetcher = MicrodatosINEIFetcher(
+        encuesta="endes",
+        years=[2011, 2013],
+        dir_master="./datos_inei",
+        n_jobs=2
+    )
+    fetcher.fetch_modules().download_zips(formats=["spss", "dbf"], modules=[64, 65]).organize_files(
+        order_by="anio",
+        keep_original_names=True,
+        move_or_copy="copy"
+    )
     # Ejemplo: ENAHO 2011-2013
     fetcher = MicrodatosINEIFetcher(
         encuesta="enaho",
@@ -295,7 +400,7 @@ if __name__ == "__main__":
         n_jobs=2
     )
     fetcher.fetch_modules().download_zips(formats=["stata", "csv"], modules=list(range(0, 5))).organize_files(
-        order_by="anio",
+        order_by="modulo",
         keep_original_names=True,
         move_or_copy="copy"
     )
