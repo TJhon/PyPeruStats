@@ -26,11 +26,7 @@ all_freq = diarios + mensuales + trimestrales + anuales
 processor = BCRPDataProcessor(all_freq, "2002-01-02", "2023-01-01", parallel=True)
 data = processor.process_data(save_sqlite=True)
 # dataframes
-print(data.get("A")) # anuales
-print(data.get("Q")) # trimestrales
-print(data.get("M")) # mensuales
-print(data.get("D")) # 
-
-
-
-
+print(data.get("A"))  # anuales
+print(data.get("Q"))  # trimestrales
+print(data.get("M"))  # mensuales
+print(data.get("D"))  #

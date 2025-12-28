@@ -20,6 +20,7 @@ new_names = [
     "nan",
 ]
 
+
 class TelMTC:
     def __init__(self, marca="", num_cert="", model="", empresa=""):
         self.params = {
@@ -74,7 +75,10 @@ class TelMTC:
             return self.html_to_pandas(html_n)
 
         with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = {executor.submit(fetch_page_data, page): page for page in range(2, total_pages + 1)}
+            futures = {
+                executor.submit(fetch_page_data, page): page
+                for page in range(2, total_pages + 1)
+            }
             for future in tqdm(as_completed(futures), total=len(futures)):
                 try:
                     data.append(future.result())
@@ -84,9 +88,8 @@ class TelMTC:
         # Combinar todos los datos en un DataFrame final
         data_final = pd.concat(data, ignore_index=True)
         data_final.columns = new_names
-        data_final['date'] = pd.to_datetime(data_final['date'], format='%d/%m/%Y')
+        data_final["date"] = pd.to_datetime(data_final["date"], format="%d/%m/%Y")
         data_final.drop(columns=["n", "nan"], inplace=True)
-        data_final = data_final.sort_values('date', ascending=False)
+        data_final = data_final.sort_values("date", ascending=False)
 
         return data_final
-

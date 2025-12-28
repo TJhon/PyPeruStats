@@ -9,7 +9,7 @@ import requests
 
 class BCRPDataProcessor:
     """
-    A data processing utility for retrieving and managing statistical series from the 
+    A data processing utility for retrieving and managing statistical series from the
     Peruvian Central Reserve Bank (BCRP) API.
 
     This class provides functionality to:
@@ -31,9 +31,9 @@ class BCRPDataProcessor:
 
     Example:
         processor = DataProcessor(
-            codes=['PBI_1D', 'IPC_2M'], 
-            start_date='2020-01-01', 
-            end_date='2023-12-31', 
+            codes=['PBI_1D', 'IPC_2M'],
+            start_date='2020-01-01',
+            end_date='2023-12-31',
             parallel=True
         )
         results = processor.process_data()
@@ -71,7 +71,7 @@ class BCRPDataProcessor:
 
         Returns:
             dict: Dictionary with frequency indicators as keys and corresponding codes as values.
-                  Valid frequency indicators: 'D' (daily), 'M' (monthly), 
+                  Valid frequency indicators: 'D' (daily), 'M' (monthly),
                   'Q' (quarterly), 'A' (annual)
 
         Example:
@@ -150,7 +150,7 @@ class BCRPDataProcessor:
             json (dict): JSON response from BCRP API
 
         Returns:
-            pandas.DataFrame: DataFrame with time series data, 
+            pandas.DataFrame: DataFrame with time series data,
             columns include 'fecha' and series names with numeric values
 
         Note:
@@ -179,7 +179,7 @@ class BCRPDataProcessor:
         Args:
             df (pandas.DataFrame): Input DataFrame with 'fecha' column
             date_method (str, optional): Frequency method. Defaults to 'A' (annual)
-            quarter_to_timestamp (bool, optional): Convert quarters to end-of-quarter timestamp. 
+            quarter_to_timestamp (bool, optional): Convert quarters to end-of-quarter timestamp.
                                                    Defaults to True
 
         Returns:
@@ -226,11 +226,11 @@ class BCRPDataProcessor:
         Process data from the BCRP (Central Reserve Bank of Peru) API for multiple series codes.
 
         This method retrieves statistical data from the BCRP API for different time series codes,
-        handling multiple frequencies (daily, monthly, quarterly, annual) and performing 
+        handling multiple frequencies (daily, monthly, quarterly, annual) and performing
         data transformations.
 
         Args:
-            save_sqlite (bool, optional): If True, saves the processed data to a SQLite database. 
+            save_sqlite (bool, optional): If True, saves the processed data to a SQLite database.
                 Defaults to False.
 
         Returns:
@@ -244,8 +244,8 @@ class BCRPDataProcessor:
 
         Example:
             processor = DataProcessor(
-                codes=['PBI_1D', 'IPC_2M'], 
-                start_date='2020-01-01', 
+                codes=['PBI_1D', 'IPC_2M'],
+                start_date='2020-01-01',
                 end_date='2023-12-31'
             )
             results = processor.process_data(save_sqlite=True)
@@ -275,4 +275,3 @@ class BCRPDataProcessor:
             self.save_to_sqlite(data_result)
 
         return data_result
-
