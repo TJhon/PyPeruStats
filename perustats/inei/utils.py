@@ -203,8 +203,8 @@ def execute_curl_survey_request(
         data_raw,
     ]
     # print(cmd)
-    result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-    return result.stdout
+    result = subprocess.run(cmd, capture_output=True)
+    return result.stdout.decode('utf-8', errors='ignore')
 
 
 def _file_hash(path: Path, chunk_size: int = 1 << 20) -> str:
