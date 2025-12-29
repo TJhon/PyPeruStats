@@ -45,7 +45,7 @@ Homepage = "https://github.com/TJhon/PyPeruStats"
 Issues = "https://github.com/TJhon/PyPeruStats/issues"
 
 [tool.setuptools]
-package-dir = {"" = "pyperustats"}
+packages = ["pyperustats"]
 
 [tool.setuptools.packages.find]
 where = ["."]
