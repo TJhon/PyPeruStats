@@ -3,8 +3,8 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "pyperustats"
-version = "0.1.3"
+name = "perustats"
+version = "0.1.4"
 description = "Tools to download and process public datasets from Peru (INEI & BCRP)."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -47,7 +47,7 @@ Issues = "https://github.com/TJhon/PyPeruStats/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["pyperustats*"]
+include = ["perustats*"]
 
 [tool.ruff]
 exclude = ["*.ipynb", ".venv", "build", "data"]
