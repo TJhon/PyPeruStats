@@ -19,6 +19,7 @@ cache/
 *.xlsx
 
 pyPeruStatsa/dir/enaho
+datos_inei/
 
 # Distribution / packaging
 .Python

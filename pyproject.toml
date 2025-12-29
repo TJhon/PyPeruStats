@@ -1,20 +1,52 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "pyperustats"
-version = "0.1.0"
-description = "Add your description here"
+version = "0.1.1"
+description = "Tools to download and process public datasets from Peru (INEI & BCRP)."
 readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-    "bs4>=0.0.2",
-    "httpx>=0.28.1",
-    "joblib>=1.5.3",
-    "lxml>=6.0.2",
-    "pandas>=2.3.3",
-    "requests>=2.32.5",
-    "rich>=14.2.0",
-    "tqdm>=4.67.1",
-    "unidecode>=1.4.0",
+license = { text = "Apache-2.0" }
+requires-python = ">=3.9"
+
+authors = [
+  { name="Jhon K. Flores Rojas", email="fr.jhonk@gmail.com" }
 ]
+
+dependencies = [
+  "bs4",
+  "httpx",
+  "joblib",
+  "lxml",
+  "pandas",
+  "requests",
+  "rich",
+  "tqdm",
+  "unidecode"
+]
+
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: OS Independent",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Software Development :: Libraries",
+]
+
+[project.urls]
+Homepage = "https://github.com/TJhon/PyPeruStats"
+Issues = "https://github.com/TJhon/PyPeruStats/issues"
+
+[tool.setuptools]
+package-dir = {"" = "pyperustats"}
+
+[tool.setuptools.packages.find]
+where = ["pyperustats"]
+include = ["pyperustats*"]
 
 [tool.ruff]
 exclude = ["*.ipynb", ".venv", "build", "data"]
