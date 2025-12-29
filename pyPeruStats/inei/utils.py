@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Optional
 import pandas as pd
 from bs4 import BeautifulSoup
-from constants import SURVEYS_CONFIG, SESSION_COOKIE, USER_AGENT, BASE_URL
+from .constants import SURVEYS_CONFIG, SESSION_COOKIE, USER_AGENT, BASE_URL
 from rich import print
 import hashlib
 

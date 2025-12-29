@@ -23,22 +23,23 @@ from rich.console import Console
 import subprocess
 import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from constants import BASE_URL, RELEVANT_EXTENSIONS
-from utils import (
+from .constants import BASE_URL, RELEVANT_EXTENSIONS
+from .utils import (
     slugify,
     _file_hash,
     is_zip_valid,
     html_to_dataframe,
     execute_curl_survey_request,
 )
-from tqdm import tqdm
 
 console = Console()
 
-
+# importantes
+# self.modules_dataframe: representa los modulos existentes para esos anios
+# self.documentation_map: representa archivos unicos que estan en otros directorios
 class MicrodatosINEIFetcher:
     """
-    Fetcher for downloading and organizing INEI microdatos (microdata).
+    Fetcher for downloading and organizing INEI microdatos (microdata) .
 
     This class handles:
     - Fetching available modules from INEI
@@ -93,7 +94,7 @@ class MicrodatosINEIFetcher:
             console=console,
         ) as progress:
             task = progress.add_task(
-                f"[cyan]Fetching {self.survey} modules...", total=len(self.years)
+                f"[cyan]Fetching [yellow]{self.survey.upper()} [cyan]modules...", total=len(self.years)
             )
 
             results = []
@@ -209,8 +210,7 @@ class MicrodatosINEIFetcher:
             console.print("[yellow]No files to download[/yellow]")
             return self
 
-        # Download files with progress tracking
-        start_time = time.time()
+
 
         with Progress(
             SpinnerColumn(),
@@ -221,7 +221,7 @@ class MicrodatosINEIFetcher:
             console=console,
         ) as progress:
             task = progress.add_task(
-                f"[yellow]{self.survey.upper()}: [cyan]Downloading ZIP files...",
+                f"[yellow]{self.survey.upper()}: [cyan]Downloading {len(download_tasks)} ZIP files...",
                 total=len(download_tasks),
             )
             with ThreadPoolExecutor(max_workers=self.parallel_jobs) as ex:
