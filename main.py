@@ -1,4 +1,4 @@
-from pyperustats import print_tree
+from perustats import print_tree
 
 print_tree(
     ".",
