@@ -7,125 +7,255 @@ Sources: INEI, BCRP
 ### Installation
 
 ```bash
-pip install pyperustats
+pip install perustats
 ```
 
 
 
-## INEI
+## INEI Microdata
 
-### Parameters Description
+### Overview
 
-#### MICRODATOS_INEI
+The `MicrodatosINEIFetcher` class provides a comprehensive tool for downloading and organizing INEI (Instituto Nacional de Estadística e Informática) microdata from Peruvian surveys.
 
-- `survey`: Survey type ('enaho', 'enapres', 'endes')
-  - Available up to 2024-Quarter 3
+### Key Features
 
-#### download_default
+- Fetch available modules across multiple years
+- Download data files in multiple formats (Stata, SPSS, CSV, DBF)
+- Parallel downloading with configurable workers
+- Automatic ZIP extraction and validation
+- Flexible file organization by module or year
+- Smart documentation handling with duplicate detection
+- Hash-based deduplication for PDF files
 
-- `format`: Output file format
-  - 'csv': CSV files
-  - 'stata': Stata files
-  - 'spss': SPSS files
-- `force`: Force re-download of existing files
-- `remove_zip`: Remove ZIP files after extraction
-- `workers`: Number of workers for parallel download
-- `zip_dir`: Directory to store ZIP files
+### Parameters
 
-#### organize_files
+#### `MicrodatosINEIFetcher`
 
-- `dir_output`: Directory where organized files will be saved
-- `order_by`: Organization method
-  - 'modules': Structure "mod_01/year_n.csv"
-- `ext_documentation`: List of documentation extensions
-- `delete_master_dir`: Delete master directory after organizing
+- `survey`: Survey type to fetch
+  - `'enaho'`: National Household Survey
+  - `'endes'`: Demographic and Family Health Survey
+  - `'enapres'`: National Budget Programs Survey
+  - Available up to 2024
+  
+- `years`: List of years to fetch data for (e.g., `[2020, 2021, 2022]`)
 
-### USAGE
+- `master_directory`: Root directory for storing downloaded data (default: `'./microdatos_inei'`)
 
-```py
-from pyPeruStats import MICRODATOS_INEI, print_tree
+- `parallel_jobs`: Number of parallel download jobs (default: `2`)
 
-# Options: enaho, enapres, endes, available up to 2024-Quarter 3
-enaho = MICRODATOS_INEI(survey="enaho") 
-modules = enaho.modules
-# Found modules 
-print(modules.head(2))
-```
+#### `download_zips()`
 
-```
-   codigo_modulo                                      modulo      anio
-0              1  Características de la Vivienda y del Hogar  2024 ...
-1              2   Características de los Miembros del Hogar  2024 ...
-```
+- `formats`: List of formats to download (default: `['stata', 'spss', 'csv']`)
+  - `'stata'`: Stata .dta files
+  - `'spss'`: SPSS .sav files
+  - `'csv'`: CSV files
+  - `'dbf'`: dBASE files
 
-```py
-downloaded = enaho.search(
-    [2021, 2023, 2004, 2006, 2007, 2008], [1, 2, 3, 8]
-).download_default(
-    format='csv', # csv, stata, spss
-    force=False, # download zip files again
-    remove_zip=False, # remove original zips from microdata page
-    workers=4,  # Parallel download
-    zip_dir="trash_zips" # where zips will be downloaded
+- `force_download`: Force re-download even if file exists (default: `True`)
+
+- `module_codes`: List of specific module codes to download (empty list = download all)
+
+- `remove_zip_after_extract`: Delete ZIP files after extraction (default: `False`)
+
+#### `organize_files()`
+
+- `organize_by`: Organization scheme
+  - `'module'`: Structure by module (e.g., `001_module_name/2020_file.csv`)
+  - `'year'`: Structure by year (e.g., `2020/001_file.csv`)
+
+- `keep_original_names`: Keep original filenames (default: `True`)
+
+- `operation`: File operation type
+  - `'copy'`: Copy files (preserves originals)
+  - `'move'`: Move files (removes from unzipped directory)
+
+- `docs_by_hash`: Use hash-based deduplication for documentation files (default: `True`)
+  - When `True`, identical PDFs are stored only once regardless of filename
+
+### Usage Examples
+
+#### Example 1: ENDES Survey (Multiple Years and Modules)
+
+```python
+from perustats import MicrodatosINEIFetcher
+import time
+
+# Initialize ENDES fetcher for years 1990-2023
+start = time.time()
+endes = MicrodatosINEIFetcher(
+    survey="endes",
+    years=list(range(1990, 2024)),
+    master_directory="./datos_inei",
+    parallel_jobs=6
 )
 
-# Downloaded files within directory
-print_tree('./trash_zips/')
-```
+# Fetch available modules
+endes.fetch_modules()
 
-```
-📁 trash_zips
-└── 📁 inei_enaho_download
-    ├── 📁 2004
-        ├── 📁 2004_01
-        │   └── 📁 280-Modulo01
-        │   │   ├── 📄 CED-01-100 2004.pdf
-        │   │   ├── 📄 Diccionario.pdf
-        │   │   ├── 📄 enaho01-2004-100.dta
-        │   │   └── 📄 Ficha Tecnica - 2004.pdf
-        ├── 📁 2004_02
-....
-```
-
-```py
-result_files = downloaded.organize_files(
-    dir_output="./data_inei/", # Where files will be saved
-    order_by="modules", # modules: file structure "mod_01/year_n.csv" ; # year: file structure year_n/mod_n
-    ext_documentation=['pdf'], # files used for documentation
-    delete_master_dir=False # true if you want to delete all zip files and unzip again (use with caution)
+# Download specific modules in multiple formats
+endes.download_zips(
+    formats=["spss", "dbf", "stata", "csv"],
+    module_codes=[64, 65, 73, 74],  # Specific modules
+    force_download=True,
+    remove_zip_after_extract=False
 )
-print_tree("./data_inei/") # print file structure
-```
+
+# Organize files by year
+endes.organize_files(
+    organize_by="year",
+    keep_original_names=True,
+    operation="copy"
+)
+
+# Also organize by module
+endes.organize_files(
+    organize_by="module",
+    keep_original_names=True,
+    operation="copy"
+)
 
 ```
-📁 data_inei
-├── 📁 documentation_pdf
-    ├── 📄 2004_01_ced-01-100_2004.pdf
-    ├── 📄 2004_01_diccionario.pdf
-    ├── 📄 2004_01_ficha_tecnica_-_2004
-...
-└── 📁 modules
-    ├── 📁 001
-        ├── 📄 2004.dta
-        ├── 📄 2006.dta
-        ├── 📄 2007.dta
-        ├── 📄 2008.csv
-        ├── 📄 2021.csv
-        └── 📄 2023.csv
-    ├── 📁 002
-        ├── 📄 2004.dta
-        ├── 📄 2006.dta
-        ├── 📄 2007.dta
-        ├── 📄 2008.csv
-....
+
+#### Example 2: ENAHO Survey (National Household Survey)
+
+```python
+# Initialize ENAHO fetcher for years 2000-2024
+enaho = MicrodatosINEIFetcher(
+    survey="enaho",
+    years=list(range(2000, 2025)),
+    master_directory="./datos_inei",
+    parallel_jobs=4
+)
+
+# Fetch available modules
+enaho.fetch_modules()
+
+# Display available modules (first 5)
+print(enaho.modules_dataframe.head())
+
+# Download specific modules
+enaho.download_zips(
+    formats=["csv", "stata", "spss", "dbf"],
+    module_codes=[1, 13, 22, 34],
+    force_download=False
+)
+
+# Organize by year with original names
+enaho.organize_files(
+    organize_by="year",
+    keep_original_names=True,
+    operation="copy",
+    docs_by_hash=True  # Deduplicate documentation by content hash
+)
+
+# Also organize by module
+enaho.organize_files(
+    organize_by="module",
+    keep_original_names=True,
+    operation="copy"
+)
 ```
+
+#### Example 3: ENAPRES Survey (Budget Programs)
+
+```python
+# Initialize ENAPRES fetcher
+enapres = MicrodatosINEIFetcher(
+    survey="enapres",
+    years=list(range(2010, 2025)),
+    master_directory="./datos_inei",
+    parallel_jobs=3
+)
+
+# Fetch and download in one chain
+enapres.fetch_modules().download_zips(
+    formats=["stata", "csv"],
+    module_codes=[101, 102, 111]
+).organize_files(
+    organize_by="module",
+    keep_original_names=True,
+    operation="move"  # Move instead of copy to save space
+)
+```
+
+#### Example 4: Inspect Available Modules
+
+```python
+# Fetch modules without downloading
+enaho = MicrodatosINEIFetcher(
+    survey="enaho",
+    years=[2020, 2021, 2022, 2023]
+)
+
+enaho.fetch_modules()
+
+# View available modules
+print(enaho.modules_dataframe[['year', 'module_code', 'module_name']])
+```
+
+### Directory Structure
+
+The fetcher creates the following directory structure:
+
+```
+./microdatos_inei/
+└── enaho/                          # Survey name
+    ├── 0_zips/                     # Downloaded ZIP files
+    │   ├── 2020_mod_001.zip
+    │   └── 2020_mod_002.zip
+    ├── 1_unzipped/                 # Extracted contents
+    │   ├── 2020_mod_001/
+    │   └── 2020_mod_002/
+    └── 2_organized/                # Organized files
+        ├── by_module/              # When organize_by='module'
+        │   ├── 001_vivienda_hogar/
+        │   │   ├── 2020_file.csv
+        │   │   └── 2021_file.csv
+        │   └── 002_caracteristicas_miembros/
+        │       ├── 2020_file.csv
+        │       └── 2021_file.csv
+        ├── by_year/                # When organize_by='year'
+        │   ├── 2020/
+        │   │   ├── 001_file.csv
+        │   │   └── 002_file.csv
+        │   └── 2021/
+        │       ├── 001_file.csv
+        │       └── 002_file.csv
+        └── documentation/          # PDF documentation (deduplicated)
+            ├── 2020_mod_001_manual.pdf
+            └── 2020_mod_002_manual.pdf
+```
+
+### Important Attributes
+
+- `modules_dataframe`: DataFrame containing all available modules for the specified years
+- `documentation_map`: Dictionary mapping canonical PDF filenames to their aliases (useful for tracking deduplicated files)
+- `zip_maps`: List of tuples containing (zip_path, extract_path) for all processed files
+
+### Best Practices
+
+1. **Start with fewer years**: Test with 2-3 years before downloading extensive ranges
+2. **Use parallel jobs wisely**: Higher values speed up downloads but consume more bandwidth
+3. **Keep ZIP files initially**: Set `remove_zip_after_extract=False` for backup purposes
+4. **Hash-based deduplication**: Enable `docs_by_hash=True` to avoid duplicate documentation files
+5. **Check disk space**: Large surveys across many years can consume significant storage
+6. **Use method chaining**: The fluent API allows chaining `fetch_modules()`, `download_zips()`, and `organize_files()`
+
+### Performance Tips
+
+- Use `parallel_jobs=4` or higher for faster downloads (adjust based on your connection)
+  - With 100 Mbps connection: ~134 ZIP files download in 1.20-1.30 seconds
+- Use `operation='move'` instead of `'copy'` to save disk space
+- Filter by `module_codes` to download only needed modules
+- Enable `remove_zip_after_extract=True` if storage is limited (after verifying extraction)
 
 ### Notes
 
-1. Parallel download significantly improves performance but consumes more resources
-2. It's recommended to keep original ZIP files as backup
-3. Check disk space before downloading multiple years/modules
-4. Documentation files are organized in a separate directory
+- ZIP file integrity is automatically validated; corrupted files are re-downloaded
+- Documentation files are deduplicated by content hash when `docs_by_hash=True`
+- The class handles network failures gracefully with automatic retries
+- All file operations preserve original data integrity
 
 
 ## BCRP
@@ -215,12 +345,3 @@ Apache 2.0
 
 fr.jhonk@gmail.com
 
-# TODO
-
-- BCRP
-  - [x] Download statistical data from BCRP
-  - [ ] Implement advanced data search functionality
-  - [ ] Create autoplot functionality (inspired by ggplot)
-  - [ ] Set up GitHub repository and backup mechanism
-  - [ ] Add comprehensive documentation
-  - [ ] Create example notebooks
