@@ -2,6 +2,8 @@
 
 ## INEI
 
+- [] RENAMU
+
 ## BCRP
 
 - [x] Download statistical data from BCRP
@@ -12,3 +14,9 @@
   - [x] Readme
   - [ ] ReadDocs
 - [ ] Create example notebooks
+
+## MEF
+
+- [ ] Consulta Amigable
+  - [ ] Ingresos
+  - [ ] Gastos
