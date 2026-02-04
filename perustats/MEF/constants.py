@@ -118,10 +118,16 @@ COLUMNS_INGRESO = [
 # ============================================
 
 # Gastos
-GASTO_URL_V4 = "https://apps5.mineco.gob.pe/transparencia/mensual/Navegar_4.aspx?y={year}&ap=ActProy"
-GASTO_URL_V5 = "https://apps5.mineco.gob.pe/transparencia/mensual/Navegar_5.aspx?y={year}&ap=ActProy"
-GASTO_URL_V6 = "https://apps5.mineco.gob.pe/transparencia/mensual/Navegar_6.aspx?y={year}&ap=ActProy"
-GASTO_URL_V7 = "https://apps5.mineco.gob.pe/transparencia/Navegador/Navegar_7.aspx?y={year}&ap=ActProy"
+GASTO_URL_V4 = (
+    "https://apps5.mineco.gob.pe/transparencia/mensual/Navegar_4.aspx?y={year}&ap={ap}"
+)
+GASTO_URL_V5 = (
+    "https://apps5.mineco.gob.pe/transparencia/mensual/Navegar_5.aspx?y={year}&ap={ap}"
+)
+GASTO_URL_V6 = (
+    "https://apps5.mineco.gob.pe/transparencia/mensual/Navegar_6.aspx?y={year}&ap={ap}"
+)
+GASTO_URL_V7 = "https://apps5.mineco.gob.pe/transparencia/Navegador/Navegar_7.aspx?y={year}&ap={ap}"
 
 # Ingresos
 INGRESO_URL_V4 = "https://apps5.mineco.gob.pe/transparenciaingresos/Navegador/Navegar_4.aspx?y={year}"

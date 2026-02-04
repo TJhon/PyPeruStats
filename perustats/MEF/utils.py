@@ -233,6 +233,7 @@ def build_payload(
     button_labels: dict,
     extras: dict = None,
     tipo: str = "gasto",
+    act_proy: str = "ActProy",
 ) -> dict:
     """
     Construye el payload para el POST
@@ -265,7 +266,7 @@ def build_payload(
 
     # Solo agregar DrpActProy para gastos
     if tipo == "gasto":
-        base_payload["ctl00$CPH1$DrpActProy"] = "ActProy"
+        base_payload["ctl00$CPH1$DrpActProy"] = act_proy
 
     return base_payload
 

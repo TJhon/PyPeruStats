@@ -69,17 +69,26 @@ class MEFScraper:
         self.save_dir = None
         self.colors = COLORS_PROGRESS
 
-    def _setup_year(self, year: int):
+    def _setup_year(self, year: int, act_proy="ActProy"):
         """
         Configura los parámetros específicos del año
 
         Args:
             year: Año a procesar
+            act_proy: solo aplicable para gasto, todo (ActProy), Actividades, Proyectos
         """
         self.year = year
         self.config = get_config(year, self.tipo)
+        if self.tipo == "gasto":
+            if act_proy not in ["ActProy", "Actividad", "Proyecto"]:
+                raise ValueError(
+                    "Para `gasto` solo esta disponible: ActProy [default], Actividad, Proyecto"
+                )
+            self.url = self.config["url"].format(year=year, ap=act_proy)
+            self.act_proy = act_proy
+        else:
+            self.url = self.config["url"].format(year=year)
 
-        self.url = self.config["url"].format(year=year)
         self.cols = self.config["columns"]
         self.buttons = self.config["buttons"]
         self.button_labels = self.config["button_labels"]
@@ -185,6 +194,7 @@ class MEFScraper:
                 self.button_labels,
                 extras=extras_params,
                 tipo=self.tipo,
+                act_proy=self.act_proy,
             )
             new_states, new_df = post_info(self.session, self.url, payload, self.cols)
 
@@ -233,6 +243,7 @@ class MEFScraper:
                 self.buttons,
                 self.button_labels,
                 tipo=self.tipo,
+                act_proy=self.act_proy,
             )
 
             try:
@@ -263,7 +274,9 @@ class MEFScraper:
 
         return all_data
 
-    def run(self, year: int, steps: List[dict]) -> Optional[pd.DataFrame]:
+    def run(
+        self, year: int, steps: List[dict], act_proy="ActProy"
+    ) -> Optional[pd.DataFrame]:
         """
         Ejecuta el scraping para un año específico con los pasos definidos
 
@@ -279,6 +292,7 @@ class MEFScraper:
                        "loop": True/False,  # opcional, redundante con select_row_text
                        "save_group": True/False,  # opcional, guardar incrementalmente
                    }
+            act_proy: solo aplicable para "gasto", todo (ActProy), Actividades, Proyectos
 
         Returns:
             DataFrame con todos los resultados o None si se guardó incrementalmente
@@ -311,7 +325,7 @@ class MEFScraper:
             ]
         """
         # Configurar año
-        self._setup_year(year)
+        self._setup_year(year, tipo=act_proy)
 
         # Inicializar sesión
         console.print("[bold]Inicializando sesión...[/bold]")
