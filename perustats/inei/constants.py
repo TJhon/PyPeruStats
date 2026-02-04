@@ -9,6 +9,10 @@ SURVEYS_CONFIG = {
         "name": "Encuesta Nacional de Programas Presupuestales - ENAPRES",
         "default_quarter": "18",
     },
+    "renamu": {
+        "name": "Registro Nacional de Municipalidades - RENAMU",
+        "default_quarter": "18",
+    },
 }
 
 
