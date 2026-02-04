@@ -17,6 +17,8 @@ BUTTONS_BASE = {
     "departamento": "ctl00$CPH1$BtnDepartamento",
     "municipalidad": "ctl00$CPH1$BtnMunicipalidad",
     "funcion": "ctl00$CPH1$BtnFuncion",
+    "fuente": "ctl00$CPH1$BtnFuenteAgregada",
+    "rubro": "ctl00$CPH1$BtnRubro",
 }
 
 BUTTONS_V5_EXTENDED = {
@@ -42,6 +44,7 @@ LABELS_GASTO_V4 = {
     **LABELS_BASE,
     "nivel_gobierno": "Niveles de Gobierno",
     "funcion": "Funciones",
+    "fuente": "Fuentes",
     "mes": "Meses",
     "departamento": "Departamentos",
     "municipalidad": "Municipalidades",
@@ -54,17 +57,21 @@ LABELS_GASTO_V5 = {
     "sub_tipo_gobierno": "Gob.Loc./Mancom.",
     "generica": "Genérica",
     "mes": "Mes",
-    "funcion": "Función",
+    "fuentes": "Fuente",
     "programa": "Programa",
     "sub_programa": "Sub-Programa",
     "departamento": "Departamento",
     "municipalidad": "Municipalidad",
+    "funcion": "Función",
+    "rubro": "Rubros",
 }
 
 # Labels para Ingresos V4 (2009-2011)
 LABELS_INGRESO_V4 = {
     "nivel_gobierno": "Nivel de Gobierno",
     "generica": "Genérica",
+    "sub_generica": "Sub-Genérica",
+    "fuente": "Fuente",
     "departamento": "Departamento",
     "municipalidad": "Municipalidad",
 }
