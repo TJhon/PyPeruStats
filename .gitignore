@@ -2,6 +2,7 @@ test_data/
 data_inei/
 trash_zips/
 _update_data.py
+test/*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 trash/

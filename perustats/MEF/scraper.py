@@ -75,17 +75,17 @@ class MEFScraper:
 
         Args:
             year: Año a procesar
-            act_proy: solo aplicable para gasto, todo (ActProy), Actividades, Proyectos
+            act_proy: solo aplicable para gasto, todo (ActProy), Actividades, Proyectos. parametro irrelevantes si es para ingresos
         """
         self.year = year
         self.config = get_config(year, self.tipo)
+        self.act_proy = act_proy
         if self.tipo == "gasto":
             if act_proy not in ["ActProy", "Actividad", "Proyecto"]:
                 raise ValueError(
                     "Para `gasto` solo esta disponible: ActProy [default], Actividad, Proyecto"
                 )
             self.url = self.config["url"].format(year=year, ap=act_proy)
-            self.act_proy = act_proy
         else:
             self.url = self.config["url"].format(year=year)
 
@@ -120,10 +120,11 @@ class MEFScraper:
         initial_states = extract_states(soup)
         initial_df = html_table_to_dataframe(soup, columns=self.cols, convert=False)
 
-        return initial_states, initial_df
+        return initial_states, initial_df, soup
 
     def _process_from_step(
         self,
+        soup,
         step_idx: int,
         state: dict,
         df: pd.DataFrame,
@@ -164,6 +165,9 @@ class MEFScraper:
         should_loop = text_search is None
 
         step_spaces = "  " * (step_idx + 1)
+        a = {f"{name_col}": should_save}
+        if should_save:
+            console.print(f"[yellow]{a}")
 
         # Mensaje de progreso
         if name_col is not None:
@@ -186,6 +190,7 @@ class MEFScraper:
                 metadata[name_col] = [df.iloc[idx][self.cols[1]]]
 
             payload = build_payload(
+                soup,
                 self.year,
                 state,
                 click_bttn,
@@ -196,10 +201,12 @@ class MEFScraper:
                 tipo=self.tipo,
                 act_proy=self.act_proy,
             )
-            new_states, new_df = post_info(self.session, self.url, payload, self.cols)
+            new_states, new_df, new_soup = post_info(
+                self.session, self.url, payload, self.cols
+            )
 
             return self._process_from_step(
-                step_idx + 1, new_states, new_df, metadata.copy(), steps
+                new_soup, step_idx + 1, new_states, new_df, metadata.copy(), steps
             )
 
         # ========================================
@@ -236,6 +243,7 @@ class MEFScraper:
 
             # Hacer POST
             payload = build_payload(
+                soup,
                 self.year,
                 state,
                 click_bttn,
@@ -247,7 +255,7 @@ class MEFScraper:
             )
 
             try:
-                new_states, new_df = post_info(
+                new_states, new_df, new_soup = post_info(
                     self.session, self.url, payload, self.cols
                 )
             except Exception as e:
@@ -262,7 +270,7 @@ class MEFScraper:
             else:
                 # Recursión: continuar al siguiente paso
                 child_results = self._process_from_step(
-                    step_idx + 1, new_states, new_df, current_meta, steps
+                    new_soup, step_idx + 1, new_states, new_df, current_meta, steps
                 )
                 all_data.extend(child_results)
 
@@ -325,11 +333,11 @@ class MEFScraper:
             ]
         """
         # Configurar año
-        self._setup_year(year, tipo=act_proy)
+        self._setup_year(year, act_proy=act_proy)
 
         # Inicializar sesión
         console.print("[bold]Inicializando sesión...[/bold]")
-        initial_states, initial_df = self._init_session()
+        initial_states, initial_df, initial_soup = self._init_session()
         console.print(
             f"[green]✓ Sesión iniciada. Filas iniciales: {len(initial_df)}[/green]\n"
         )
@@ -337,6 +345,7 @@ class MEFScraper:
         # Ejecutar proceso recursivo
         console.print("[bold]Iniciando proceso de extracción...[/bold]\n")
         results = self._process_from_step(
+            soup=initial_soup,
             step_idx=0,
             state=initial_states,
             df=initial_df,

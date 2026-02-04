@@ -30,6 +30,14 @@ def _is_jupyter():
 console = get_console()
 
 
+def get_button_label(soup, id_button_label: str) -> str:
+    label = soup.find("input", {"name": id_button_label})
+    button_label = label.get("value")
+    if button_label is not None:
+        return button_label
+    raise ValueError("No existe o no se implemente esa iteraccion con ese boton")
+
+
 # ============================================
 # EXTRACCIÓN DE ESTADOS Y PARSING HTML
 # ============================================
@@ -225,6 +233,7 @@ def save_dataframe(df: pd.DataFrame, save_dir: Path, name: str, value: str) -> P
 
 
 def build_payload(
+    soup,
     year: int,
     state: dict,
     button_key: str,
@@ -253,14 +262,15 @@ def build_payload(
     """
     if extras is None:
         extras = {}
-
+    id_button = buttons[button_key]
     base_payload = {
         "__EVENTTARGET": "",
         "__EVENTARGUMENT": "",
         **state,
         **extras,
         "ctl00$CPH1$DrpYear": year,
-        buttons[button_key]: button_labels[button_key],
+        # buttons[button_key]: button_labels[button_key],
+        id_button: get_button_label(soup, id_button),
         "grp1": grp,
     }
 
@@ -290,7 +300,7 @@ def post_info(
     soup = BeautifulSoup(response.text, "html.parser")
     states = extract_states(soup)
     df = html_table_to_dataframe(soup, columns=columns)
-    return states, df
+    return states, df, soup
 
 
 def init_session(url: str) -> Tuple[requests.Session, dict, pd.DataFrame]:

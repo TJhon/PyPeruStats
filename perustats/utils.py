@@ -1,7 +1,5 @@
-import os
 from pathlib import Path
 from typing import List, Optional
-
 
 
 def print_tree(
@@ -43,9 +41,7 @@ def print_tree(
     # 🔎 EXCLUSIÓN POR NOMBRE DE CARPETA
     if exclude_dirs:
         items = [
-            item
-            for item in items
-            if not (item.is_dir() and item.name in exclude_dirs)
+            item for item in items if not (item.is_dir() and item.name in exclude_dirs)
         ]
 
     # 🔎 EXCLUSIÓN POR EXTENSIÓN
