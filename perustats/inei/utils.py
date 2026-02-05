@@ -222,6 +222,10 @@ def deep_execute_curl_survey_request(survey: str, year: int, periodo="anual") ->
     return quarter
 
 
+def to_curl_cmd(cmd: list[str]) -> str:
+    return " ".join(f'"{c}"' if " " in c or '"' in c else c for c in cmd)
+
+
 def execute_curl_survey_request(
     survey: str, year: int, quarter: Optional[str] = None
 ) -> str:
@@ -285,7 +289,7 @@ def execute_curl_survey_request(
         "--data-raw",
         data_raw,
     ]
-    # print(cmd)
+    print(to_curl_cmd(cmd))
     result = subprocess.run(cmd, capture_output=True)
     return result.stdout.decode("utf-8", errors="ignore")
 
