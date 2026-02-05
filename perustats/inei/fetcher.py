@@ -97,22 +97,24 @@ class MicrodatosINEIFetcher:
             # print(df)
             return df
 
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            BarColumn(),
-            TaskProgressColumn(),
-            console=console,
-        ) as progress:
-            task = progress.add_task(
-                f"[cyan]Fetching [yellow]{self.survey.upper()} [cyan]modules...",
-                total=len(self.years),
-            )
+        # with Progress(
+        #     SpinnerColumn(),
+        #     TextColumn("[progress.description]{task.description}"),
+        #     BarColumn(),
+        #     TaskProgressColumn(),
+        #     console=console,
+        # ) as progress:
+        #     task = progress.add_task(
+        #         f"[cyan]Fetching [yellow]{self.survey.upper()} [cyan]modules...",
+        #         total=len(self.years),
+        #     )
 
-            results = []
-            for year in self.years:
-                results.append(_fetch_year(year))
-                progress.update(task, advance=1)
+        results = []
+        from tqdm import tqdm
+
+        for year in tqdm(self.years):
+            results.append(_fetch_year(year))
+            # progress.update(task, advance=1)
 
         self.modules_dataframe = pd.concat(results, ignore_index=True).drop_duplicates()
         return self
