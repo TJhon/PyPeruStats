@@ -142,7 +142,7 @@ def html_to_dataframe(html: str) -> pd.DataFrame:
 
 def extract_periodo_value(html: str, periodo="anual") -> str | None:
     soup = BeautifulSoup(html, "html.parser")
-
+    # print(soup)
     options = soup.find_all("option")
 
     for opt in options:
@@ -183,7 +183,7 @@ def deep_execute_curl_survey_request(survey: str, year: int, periodo="anual") ->
     cmd = [
         "curl",
         "-s",
-        f"{BASE_URL}/cambiaPeriodo.asp",
+        f"{BASE_URL}/CambiaAnio.asp",
         "-H",
         "Accept: */*",
         "-H",
