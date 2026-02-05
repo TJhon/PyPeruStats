@@ -93,7 +93,8 @@ class MicrodatosINEIFetcher:
                 print(qt)
                 html = execute_curl_survey_request(self.survey, year, qt)
                 # print(html[:400])
-            return html_to_dataframe(html)
+            df = html_to_dataframe(html)
+            return df
 
         with Progress(
             SpinnerColumn(),
