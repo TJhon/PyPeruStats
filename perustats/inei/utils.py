@@ -223,7 +223,13 @@ def deep_execute_curl_survey_request(survey: str, year: int, periodo="anual") ->
 
 
 def to_curl_cmd(cmd: list[str]) -> str:
-    return " ".join(f'"{c}"' if " " in c or '"' in c else c for c in cmd)
+    out = []
+    for c in cmd:
+        if " " in c or '"' in c:
+            c = c.replace('"', r"\"")
+            c = f'"{c}"'
+        out.append(c)
+    return " ^\n  ".join(out)
 
 
 def execute_curl_survey_request(
