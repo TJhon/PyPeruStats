@@ -26,6 +26,7 @@ from rich.progress import (
 from .constants import BASE_URL, RELEVANT_EXTENSIONS
 from .utils import (
     _file_hash,
+    deep_execute_curl_survey_request,
     execute_curl_survey_request,
     html_to_dataframe,
     is_zip_valid,
@@ -75,7 +76,7 @@ class MicrodatosINEIFetcher:
         self.organized_directory = self.master_directory / "2_organized"
         self.zip_maps = []
 
-    def fetch_modules(self, quarter=None):
+    def fetch_modules(self, periodo=None):
         """
         Fetch available modules for all specified years.
 
@@ -84,10 +85,12 @@ class MicrodatosINEIFetcher:
         """
 
         def _fetch_year(year) -> pd.DataFrame:
-            if quarter is None:
+
+            if periodo is None:
                 html = execute_curl_survey_request(self.survey, year)
             else:
-                html = execute_curl_survey_request(self.survey, year, quarter=quarter)
+                qt = deep_execute_curl_survey_request(self.survey, year, periodo)
+                html = execute_curl_survey_request(self.survey, year, qt)
             return html_to_dataframe(html)
 
         with Progress(

@@ -2,18 +2,19 @@
 Utility functions for INEI Microdatos Fetcher.
 """
 
-import unicodedata
+import hashlib
 import re
-import zipfile
 import subprocess
-from urllib.parse import quote
+import unicodedata
+import zipfile
 from pathlib import Path
 from typing import Optional
+from urllib.parse import quote
+
 import pandas as pd
 from bs4 import BeautifulSoup
-from .constants import SURVEYS_CONFIG, SESSION_COOKIE, USER_AGENT, BASE_URL
-from rich import print
-import hashlib
+
+from .constants import BASE_URL, SESSION_COOKIE, SURVEYS_CONFIG, USER_AGENT
 
 
 # Encuesta%20Demogr%E1fica%20y%20de%20Salud%20Familiar%20-%20ENDES
@@ -139,6 +140,88 @@ def html_to_dataframe(html: str) -> pd.DataFrame:
     return pd.DataFrame(data)
 
 
+def extract_periodo_value(html: str, periodo="anual") -> str | None:
+    soup = BeautifulSoup(html, "html.parser")
+
+    options = soup.find_all("option")
+
+    for opt in options:
+        text = opt.get_text(strip=True).lower()
+
+        if periodo == "anual" and "anual" in text.lower():
+            return opt.get("value")
+
+        if periodo == "trimestre" and "trimestre" in text.lower():
+            return opt.get("value")
+
+    return None
+
+
+def deep_execute_curl_survey_request(survey: str, year: int, periodo="anual") -> str:
+    """
+    Execute curl request to fetch survey data from INEI.
+
+    Args:
+        survey: Survey type (enaho, endes, enapres)
+        year: Year to fetch
+        quarter: Optional quarter override
+
+    Returns:
+        HTML response from INEI
+
+    Raises:
+        ValueError: If survey type is not supported
+    """
+    if survey not in SURVEYS_CONFIG:
+        raise ValueError(f"Survey not supported: {survey}")
+
+    config = SURVEYS_CONFIG[survey]
+    encoded_name = url_encode_survey_name(config["name"])
+
+    data_raw = f"bandera=1&_cmbEncuesta={encoded_name}&_cmbAnno={year}&_cmbEncuesta0={encoded_name}"
+
+    cmd = [
+        "curl",
+        "-s",
+        f"{BASE_URL}/cambiaPeriodo.asp",
+        "-H",
+        "Accept: */*",
+        "-H",
+        "Accept-Language: es,en;q=0.9",
+        "-H",
+        "Connection: keep-alive",
+        "-H",
+        "Content-Type: application/x-www-form-urlencoded",
+        "-b",
+        SESSION_COOKIE,
+        "-H",
+        f"Origin: {BASE_URL}",
+        "-H",
+        f"Referer: {BASE_URL}/Consulta_por_Encuesta.asp",
+        "-H",
+        "Sec-Fetch-Dest: empty",
+        "-H",
+        "Sec-Fetch-Mode: cors",
+        "-H",
+        "Sec-Fetch-Site: same-origin",
+        "-H",
+        f"User-Agent: {USER_AGENT}",
+        "-H",
+        'sec-ch-ua: "Chromium";v="140", "Not=A?Brand";v="24", "Opera";v="124"',
+        "-H",
+        "sec-ch-ua-mobile: ?0",
+        "-H",
+        'sec-ch-ua-platform: "Windows"',
+        "--data-raw",
+        data_raw,
+    ]
+    # print(cmd)
+    result = subprocess.run(cmd, capture_output=True)
+    html = result.stdout.decode("utf-8", errors="ignore")
+    quarter = extract_periodo_value(html, periodo=periodo)
+    return quarter
+
+
 def execute_curl_survey_request(
     survey: str, year: int, quarter: Optional[str] = None
 ) -> str:
@@ -204,7 +287,7 @@ def execute_curl_survey_request(
     ]
     # print(cmd)
     result = subprocess.run(cmd, capture_output=True)
-    return result.stdout.decode('utf-8', errors='ignore')
+    return result.stdout.decode("utf-8", errors="ignore")
 
 
 def _file_hash(path: Path, chunk_size: int = 1 << 20) -> str:
