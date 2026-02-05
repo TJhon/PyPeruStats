@@ -90,7 +90,9 @@ class MicrodatosINEIFetcher:
                 html = execute_curl_survey_request(self.survey, year)
             else:
                 qt = deep_execute_curl_survey_request(self.survey, year, periodo)
+                print(qt)
                 html = execute_curl_survey_request(self.survey, year, qt)
+                print(html[:400])
             return html_to_dataframe(html)
 
         with Progress(
