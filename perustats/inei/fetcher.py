@@ -4,35 +4,36 @@ Main fetcher class for downloading INEI microdatos.
 
 import os
 import shutil
-import zipfile
-from rich import print
+import subprocess
 import time
+import zipfile
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import List, Literal, Optional, Dict, Tuple
-import pandas as pd
+from typing import List, Literal
 
+import pandas as pd
+import requests
+from rich.console import Console
 from rich.progress import (
+    BarColumn,
     Progress,
     SpinnerColumn,
-    TextColumn,
-    BarColumn,
     TaskProgressColumn,
+    TextColumn,
     TimeElapsedColumn,
 )
-from rich.console import Console
-import subprocess
-import requests
-from concurrent.futures import ThreadPoolExecutor, as_completed
+
 from .constants import BASE_URL, RELEVANT_EXTENSIONS
 from .utils import (
-    slugify,
     _file_hash,
-    is_zip_valid,
-    html_to_dataframe,
     execute_curl_survey_request,
+    html_to_dataframe,
+    is_zip_valid,
+    slugify,
 )
 
 console = Console()
+
 
 # importantes
 # self.modules_dataframe: representa los modulos existentes para esos anios
@@ -74,7 +75,7 @@ class MicrodatosINEIFetcher:
         self.organized_directory = self.master_directory / "2_organized"
         self.zip_maps = []
 
-    def fetch_modules(self):
+    def fetch_modules(self, quarter=None):
         """
         Fetch available modules for all specified years.
 
@@ -83,7 +84,10 @@ class MicrodatosINEIFetcher:
         """
 
         def _fetch_year(year) -> pd.DataFrame:
-            html = execute_curl_survey_request(self.survey, year)
+            if quarter is None:
+                html = execute_curl_survey_request(self.survey, year)
+            else:
+                html = execute_curl_survey_request(self.survey, year, quarter=quarter)
             return html_to_dataframe(html)
 
         with Progress(
@@ -94,7 +98,8 @@ class MicrodatosINEIFetcher:
             console=console,
         ) as progress:
             task = progress.add_task(
-                f"[cyan]Fetching [yellow]{self.survey.upper()} [cyan]modules...", total=len(self.years)
+                f"[cyan]Fetching [yellow]{self.survey.upper()} [cyan]modules...",
+                total=len(self.years),
             )
 
             results = []
@@ -209,8 +214,6 @@ class MicrodatosINEIFetcher:
         if not download_tasks:
             console.print("[yellow]No files to download[/yellow]")
             return self
-
-
 
         with Progress(
             SpinnerColumn(),
@@ -481,17 +484,17 @@ if __name__ == "__main__":
         organize_by="module", keep_original_names=True, operation="copy"
     )
 
-    # Ejemplo: ENAHO 
+    # Ejemplo: ENAHO
     inei = MicrodatosINEIFetcher(
         survey="enaho",
         years=list(range(2000, 2025)),
         master_directory="./datos_inei",
-        parallel_jobs=2
+        parallel_jobs=2,
     )
     mod_inei = inei.fetch_modules()
 
     mod_inei.download_zips(
-        formats=["csv", 'stata', 'spss', 'dbf'], module_codes=[1, 13, 22, 34]
+        formats=["csv", "stata", "spss", "dbf"], module_codes=[1, 13, 22, 34]
     )
 
     mod_inei.organize_files(
@@ -500,17 +503,17 @@ if __name__ == "__main__":
     mod_inei.organize_files(
         organize_by="module", keep_original_names=True, operation="copy"
     )
-    # Ejemplo: ENAPRES   
+    # Ejemplo: ENAPRES
     enapres = MicrodatosINEIFetcher(
         survey="enapres",
         years=list(range(2000, 2025)),
         master_directory="./datos_inei",
-        parallel_jobs=2
+        parallel_jobs=2,
     )
     mod_enapres = enapres.fetch_modules()
 
     mod_enapres.download_zips(
-        formats=["stata", "csv", 'spss', 'dbf'], module_codes=[101, 102, 111]
+        formats=["stata", "csv", "spss", "dbf"], module_codes=[101, 102, 111]
     )
 
     mod_enapres.organize_files(
