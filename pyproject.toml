@@ -25,6 +25,8 @@ dependencies = [
   "joblib",
   "lxml",
   "pandas",
+  "polars>=1.36.1",
+  "pyarrow>=21.0.0",
   "requests",
   "rich",
   "tqdm",

@@ -295,7 +295,7 @@ def execute_curl_survey_request(
         "--data-raw",
         data_raw,
     ]
-    print(to_curl_cmd(cmd))
+    # print(to_curl_cmd(cmd))
     result = subprocess.run(cmd, capture_output=True)
     return result.stdout.decode("utf-8", errors="ignore")
 
