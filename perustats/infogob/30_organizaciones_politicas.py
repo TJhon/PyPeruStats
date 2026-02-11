@@ -3,6 +3,7 @@ import sqlite3
 import httpx
 import pandas as pd
 from bs4 import BeautifulSoup
+from tqdm import tqdm
 
 from perustats.infogob.constants import BASE_URL
 
@@ -76,7 +77,7 @@ def get_info_partido(url_):
     return df_n
 
 
-for url_ref in urls:
+for url_ref in tqdm(urls, desc="organizaciones politicas"):
     try:
         get_info_partido(url_ref)
     except:

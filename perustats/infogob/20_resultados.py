@@ -4,6 +4,7 @@ import httpx
 import pandas as pd
 from bs4 import BeautifulSoup
 from rich import print
+from tqdm import tqdm
 
 from perustats.infogob.constants import URL_LISTAR_RESULTADOS
 from perustats.infogob.utils import procesar_respuesta
@@ -91,7 +92,11 @@ def create_tables():
 create_tables()
 
 with httpx.Client(timeout=1.0) as client:
-    for _, row in procesos_electorales.iterrows():
+    for _, row in tqdm(
+        procesos_electorales.iterrows(),
+        desc="Resultados",
+        total=procesos_electorales.shape[0],
+    ):
         try:
             response = post_result(row, client)
             procesar_respuesta(conn, row, response)

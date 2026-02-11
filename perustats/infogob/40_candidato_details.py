@@ -111,7 +111,7 @@ pendientes = (
 )
 
 
-for url_pol in tqdm(pendientes["url_politico"].values):
+for url_pol in tqdm(pendientes["url_politico"].values, desc="detalle de politicos"):
     try:
         info_candidato, info_hojas_vida, info_planes = get_info_politico(url_pol)
 

@@ -77,7 +77,9 @@ pendientes = (
 )
 
 
-for _, expediente in tqdm(pendientes.iterrows(), total=pendientes.shape[0]):
+for _, expediente in tqdm(
+    pendientes.iterrows(), total=pendientes.shape[0], desc="candidatos"
+):
     # print(expediente)
     try:
         df = post_result(expediente)
