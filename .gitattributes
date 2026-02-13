@@ -1,0 +1,8 @@
+# Ignorar notebooks
+*.ipynb linguist-detectable=false
+
+# Ignorar JSON
+*.json linguist-detectable=false
+
+# Ignorar HTML
+*.html linguist-detectable=false
