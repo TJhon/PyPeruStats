@@ -18,6 +18,7 @@ Uso básico:
 
 from .constants import detect_version, get_config
 from .scraper import MEFScraper
+from .step import SearchTextStep, Step
 from .utils import (
     extract_states,
     find_row_by_text,
@@ -35,4 +36,6 @@ __all__ = [
     "find_row_by_text",
     "get_grp_from_row",
     "save_dataframe",
+    "Step",
+    "SearchTextStep",
 ]

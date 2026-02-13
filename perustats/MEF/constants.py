@@ -26,6 +26,9 @@ BUTTONS_V5_EXTENDED = {
     "sub_tipo_gobierno": "ctl00$CPH1$BtnSubTipoGobierno",
     "programa": "ctl00$CPH1$BtnPrograma",
     "sub_programa": "ctl00$CPH1$BtnSubPrograma",
+    "categoria_presupuestal": "ctl00$CPH1$BtnProgramaPpto",
+    "producto_proyecto": "ctl00$CPH1$BtnProdProy",
+    "actividad_accion": "ctl00$CPH1$BtnAAO",
 }
 
 # ============================================

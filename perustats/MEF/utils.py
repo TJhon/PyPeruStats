@@ -232,6 +232,87 @@ def save_dataframe(df: pd.DataFrame, save_dir: Path, name: str, value: str) -> P
 # ============================================
 
 
+def build_search_payload(
+    soup: BeautifulSoup,
+    year: int,
+    state: dict,
+    search_query: str,
+    search_type: str = "code",
+    tipo: str = "gasto",
+    act_proy: str = "ActProy",
+) -> dict:
+    """
+    Construye el payload para una búsqueda (por código o descripción)
+
+    Args:
+        soup: BeautifulSoup del HTML actual
+        year: Año
+        state: Estados (ViewState, EventValidation)
+        search_query: Texto a buscar
+        search_type: "code" para búsqueda por código, "description" para descripción
+        tipo: "gasto" o "ingreso"
+        act_proy: Solo para gastos
+
+    Returns:
+        Diccionario con el payload para POST
+    """
+    # Determinar qué botón usar
+    if search_type == "code":
+        event_target = "ctl00$CPH1$BtnSearchByCode"
+    elif search_type == "description":
+        event_target = "ctl00$CPH1$BtnSearchByDescription"
+    else:
+        raise ValueError(
+            f"search_type debe ser 'code' o 'description', recibido: {search_type}"
+        )
+
+    # Construir payload base
+    payload = {
+        "ctl00$CPH1$ScriptManager1": "ctl00$CPH1$UpdatePanel1|" + event_target,
+        "__LASTFOCUS": "",
+        "__EVENTTARGET": event_target,
+        "__EVENTARGUMENT": "",
+        **state,
+        "ctl00$CPH1$DrpYear": str(year),
+        "ctl00$CPH1$TxtSearch": search_query,
+        "__ASYNCPOST": True,
+    }
+
+    # Solo agregar DrpActProy para gastos
+    if tipo == "gasto":
+        payload["ctl00$CPH1$DrpActProy"] = act_proy
+
+    return payload
+
+
+def has_search_panel(soup: BeautifulSoup) -> bool:
+    """
+    Verifica si el HTML tiene el panel de búsqueda
+
+    Busca el div con id="ctl00_CPH1_PnlSearch" que contiene:
+    - Input de búsqueda: ctl00_CPH1_TxtSearch
+    - Botón buscar por código: ctl00_CPH1_BtnSearchByCode
+    - Botón buscar por descripción: ctl00_CPH1_BtnSearchByDescription
+
+    Args:
+        soup: BeautifulSoup del HTML
+
+    Returns:
+        True si existe el panel de búsqueda, False si no
+    """
+    search_panel = soup.find("div", {"id": "ctl00_CPH1_PnlSearch"})
+
+    if not search_panel:
+        return False
+
+    # Verificar que existan los elementos de búsqueda
+    search_input = soup.find("input", {"id": "ctl00_CPH1_TxtSearch"})
+    btn_code = soup.find("a", {"id": "ctl00_CPH1_BtnSearchByCode"})
+    btn_desc = soup.find("a", {"id": "ctl00_CPH1_BtnSearchByDescription"})
+
+    return all([search_input, btn_code, btn_desc])
+
+
 def build_payload(
     soup,
     year: int,
@@ -282,7 +363,7 @@ def build_payload(
 
 
 def post_info(
-    session: requests.Session, url: str, payload: dict, columns: list
+    session: requests.Session, url: str, payload: dict, columns: list, updated=False
 ) -> Tuple[dict, pd.DataFrame]:
     """
     Hace POST y retorna estados y dataframe
@@ -297,7 +378,9 @@ def post_info(
         Tupla con (estados, dataframe)
     """
     response = session.post(url, data=payload, timeout=30)
-    soup = BeautifulSoup(response.text, "html.parser")
+    html = response.text
+
+    soup = BeautifulSoup(html, "html.parser")
     states = extract_states(soup)
     df = html_table_to_dataframe(soup, columns=columns)
     return states, df, soup

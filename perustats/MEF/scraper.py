@@ -9,14 +9,18 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
+from perustats.MEF.step import SearchTextStep, Step
+
 from .constants import COLORS_PROGRESS, get_config
 from .utils import (
     build_payload,
+    build_search_payload,
     extract_states,
     filename_save,
     find_row_by_text,
     get_console,
     get_grp_from_row,
+    has_search_panel,
     html_table_to_dataframe,
     post_info,
     save_dataframe,
@@ -91,6 +95,7 @@ class MEFScraper:
 
         self.cols = self.config["columns"]
         self.buttons = self.config["buttons"]
+        # console.print(self.buttons)
         self.button_labels = self.config["button_labels"]
 
         # Directorio específico del año
@@ -103,7 +108,7 @@ class MEFScraper:
         )
         console.print(f"[bold cyan]{'=' * 60}[/bold cyan]")
         console.print(f"  URL: {self.url}")
-        console.print(f"  Columnas: {', '.join(self.cols)}")
+
         console.print(f"  Directorio de guardado: {self.save_dir}\n")
 
     def _init_session(self) -> tuple:
@@ -122,6 +127,100 @@ class MEFScraper:
 
         return initial_states, initial_df, soup
 
+    def _execute_post_steps(
+        self,
+        soup: BeautifulSoup,
+        state: dict,
+        df: pd.DataFrame,
+        post_step: SearchTextStep,
+        step_idx: int,
+    ) -> tuple:
+        """
+        Ejecuta los substeps de búsqueda (por código o descripción)
+
+        Args:
+            soup: BeautifulSoup del HTML actual
+            state: Estado actual (ViewState, EventValidation)
+            df: DataFrame actual (puede ser ignorado si hay substeps)
+            substeps: Lista de substeps a ejecutar
+            step_idx: Índice del paso principal (para colores)
+
+        Returns:
+            Tupla (nuevo_soup, nuevos_estados, nuevo_df, grp_seleccionado)
+        """
+        color = self.colors[step_idx % len(self.colors)]
+        step_spaces = "  " * (step_idx + 2)  # Extra indentación para substeps
+
+        current_soup = soup
+        current_state = state
+        current_df = df
+
+        # for substep_idx, substep in enumerate(substeps):
+        search_query = post_step.query
+        search_type = post_step.search_type
+        select_row_text = post_step.select_row_text
+        console.print(
+            f"[gray]{step_spaces} Buscando '{search_query}' usando el buscador de la plataforma del MEF<:40",
+            end="\r",
+        )
+        # Verificar que el panel de búsqueda existe
+        if not has_search_panel(current_soup):
+            console.print(
+                f"[red]{step_spaces}ADVERTENCIA: Panel de búsqueda no encontrado para este paso, probando sin paneles"
+            )
+            return state, df, soup
+
+        # Construir payload de búsqueda
+        search_payload = build_search_payload(
+            current_soup,
+            self.year,
+            current_state,
+            search_query,
+            search_type,
+            tipo=self.tipo,
+            act_proy=self.act_proy,
+        )
+
+        # Ejecutar búsqueda
+        try:
+            new_states, new_df, new_soup = post_info(
+                self.session, self.url, search_payload, self.cols, updated=True
+            )
+
+        except Exception as e:
+            console.print(f"[red]{step_spaces}❌ Error en búsqueda: {e}[/red]")
+            raise
+
+        console.print(
+            f"[green]{step_spaces}   Filas encontradas {len(new_df)} resultados[/green]",
+            end="\r",
+        )
+
+        # Si hay select_row_text, buscar esa fila específica
+        if select_row_text:
+            try:
+                idx = find_row_by_text(new_df, select_row_text)
+                # print(new_df)
+                new_df = new_df.iloc[[idx]]
+                # print(new_df)
+                selected_value = new_df[self.cols[1]][0]
+                console.print(
+                    f"[green]{step_spaces}   ✓ Seleccionado: {selected_value}[/green]",
+                    end="\r",
+                )
+            except ValueError:
+                console.print(
+                    f"[red]{step_spaces}   ❌ No se encontró '{select_row_text}' en resultados[/red]"
+                )
+                raise
+
+        # Actualizar estados para el siguiente substep
+        current_soup = new_soup
+        current_state = new_states
+        current_df = new_df
+
+        return current_soup, current_state, current_df
+
     def _process_from_step(
         self,
         soup,
@@ -129,7 +228,7 @@ class MEFScraper:
         state: dict,
         df: pd.DataFrame,
         metadata: dict,
-        steps: List[dict],
+        steps: List[Step],
     ) -> List[pd.DataFrame]:
         """
         Procesa recursivamente desde un paso específico
@@ -144,6 +243,7 @@ class MEFScraper:
         Returns:
             Lista de DataFrames con los resultados
         """
+
         n_steps = len(steps)
 
         # Caso base: ya procesamos todos los pasos
@@ -153,23 +253,17 @@ class MEFScraper:
         step_config = steps[step_idx]
         color = self.colors[step_idx % len(self.colors)]
         is_final = step_idx + 1 == n_steps
-        should_save = step_config.get("save_group", False)
-
-        click_bttn = step_config.get("click_bttn")
-        name_col = step_config.get("name")
-        step_description = step_config.get("desc", f"Paso {step_idx + 1}")
-        text_search = step_config.get("select_row_text")
-        extras_params = step_config.get(
-            "extras", {}
-        )  # para el caso de 2009 donde hay un text_search
+        should_save = step_config.save_group
+        click_bttn = step_config.click_bttn
+        name_col = step_config.name
+        step_description = step_config.desc or f"Paso {step_idx + 1}"
+        text_search = step_config.select_row_text
+        extras_params = step_config.extras or {}
+        post_step = step_config.post_step
         should_loop = text_search is None
 
         step_spaces = "  " * (step_idx + 1)
-        a = {f"{name_col}": should_save}
-        if should_save:
-            console.print(f"[yellow]{a}")
 
-        # Mensaje de progreso
         if name_col is not None:
             step_description = name_col
 
@@ -182,6 +276,7 @@ class MEFScraper:
         # ========================================
         # CASO 1: Paso sin loop (selección única)
         # ========================================
+
         if not should_loop:
             idx = find_row_by_text(df, text_search)
             grp = df.iloc[idx][self.cols[0]]
@@ -204,6 +299,14 @@ class MEFScraper:
             new_states, new_df, new_soup = post_info(
                 self.session, self.url, payload, self.cols
             )
+            if post_step:
+                # todo: implmentar esto
+                # despues de hacer el previo post buscaremos con la bsuqueda
+                # ejecuta un post y devuelve un nuevo html con el df nuevo y stados nuevos
+
+                new_soup, new_states, new_df = self._execute_post_steps(
+                    new_soup, new_states, new_df, post_step, step_idx
+                )
 
             return self._process_from_step(
                 new_soup, step_idx + 1, new_states, new_df, metadata.copy(), steps
@@ -283,7 +386,7 @@ class MEFScraper:
         return all_data
 
     def run(
-        self, year: int, steps: List[dict], act_proy="ActProy"
+        self, year: int, steps: List[Step], act_proy="ActProy"
     ) -> Optional[pd.DataFrame]:
         """
         Ejecuta el scraping para un año específico con los pasos definidos
@@ -336,14 +439,11 @@ class MEFScraper:
         self._setup_year(year, act_proy=act_proy)
 
         # Inicializar sesión
-        console.print("[bold]Inicializando sesión...[/bold]")
+        console.print("[bold]Inicializando sesión...[/bold]", end="\r")
         initial_states, initial_df, initial_soup = self._init_session()
-        console.print(
-            f"[green]✓ Sesión iniciada. Filas iniciales: {len(initial_df)}[/green]\n"
-        )
 
         # Ejecutar proceso recursivo
-        console.print("[bold]Iniciando proceso de extracción...[/bold]\n")
+        console.print("[bold]Iniciando proceso de extracción...[/bold]", end="\r")
         results = self._process_from_step(
             soup=initial_soup,
             step_idx=0,
