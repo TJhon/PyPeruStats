@@ -9,7 +9,7 @@ Constantes unificadas para scraping de SIAF MEF (Ingresos y Gastos)
 BUTTONS_BASE = {
     "nivel_gobierno": "ctl00$CPH1$BtnTipoGobierno",
     "generica": "ctl00$CPH1$BtnGenerica",
-    "sub_generica": "ctl00$CPH1$BtnSubGenerica",
+    "sub_generica": "c tl00$CPH1$BtnSubGenerica",
     "detalle_sub_generica": "ctl00$CPH1$BtnSubGenericaDetalle",
     "especifica": "ctl00$CPH1$BtnEspecifica",
     "detalle_especifica": "ctl00$CPH1$BtnEspecificaDetalle",
@@ -19,13 +19,18 @@ BUTTONS_BASE = {
     "funcion": "ctl00$CPH1$BtnFuncion",
     "fuente": "ctl00$CPH1$BtnFuenteAgregada",
     "rubro": "ctl00$CPH1$BtnRubro",
+    "programa_participativo": "ctl00$CPH1$BtnProgramaPpto",
+    "programa_ppto": "ctl00$CPH1$BtnProgramaPpto",
+    "actividad_proyecto": "ctl00$CPH1$BtnActProy",
+    "programa": "ctl00$CPH1$BtnPrograma",
+    "sub_programa": "ctl00$CPH1$BtnSubPrograma",
+    "trimestre": "ctl00$CPH1$BtnTrimestre",
 }
 
 BUTTONS_V5_EXTENDED = {
     **BUTTONS_BASE,
     "sub_tipo_gobierno": "ctl00$CPH1$BtnSubTipoGobierno",
-    "programa": "ctl00$CPH1$BtnPrograma",
-    "sub_programa": "ctl00$CPH1$BtnSubPrograma",
+    "gob_locales_mancomunidades": "ctl00$CPH1$BtnSubTipoGobierno",
     "categoria_presupuestal": "ctl00$CPH1$BtnProgramaPpto",
     "producto_proyecto": "ctl00$CPH1$BtnProdProy",
     "actividad_accion": "ctl00$CPH1$BtnAAO",

@@ -17,6 +17,7 @@
 
 ## MEF
 
-- [ ] Consulta Amigable
-  - [ ] Ingresos
-  - [ ] Gastos
+- [x] Consulta Amigable
+  - [x] Ingresos
+  - [x] Gastos
+    - [ ] Procesamiento/peticiones en paralelo en el ultimo paso (usar 6 por defecto ya que el servidor se muere)
