@@ -81,7 +81,8 @@ class MicrodatosINEIFetcher:
         """
         Extrae la tabla de modulos para ese anio, consultando la cache primero
         """
-        df = get_modules_details(self.survey, year, self.period)
+        df = get_modules_details(self.survey, year, self.period, conn=self.conn)
+        # print(df)
         return df
 
     def fetch_all_modules(self):
@@ -110,6 +111,7 @@ class MicrodatosINEIFetcher:
                 progress.update(task, advance=1)
 
         df = pd.concat(results, ignore_index=True).drop_duplicates()
+        print(df)
         # rutas de descarga
         df["module_code"] = df["module_code"].astype(str).str.zfill(4)
         df["url"] = df[self.formats].bfill(axis=1).iloc[:, 0]
@@ -214,6 +216,8 @@ class MicrodatosINEIFetcher:
                 # update la columna del sql downloaded a true para el row[url]
                 # extraer
                 status = self._extract_zips(row, remove_zip_after_extract)
+                extrated = status.get("extracted")
+                deleted = status.get("deleted")
                 # actualiar ell extracted y deleted en el sql
                 pass
 
@@ -453,22 +457,24 @@ if __name__ == "__main__":
     inicio = time.time()
     endes = MicrodatosINEIFetcher(
         survey="endes",
-        years=list(range(1990, 2024)),
+        # years=list(range(1990, 2024)),
+        years=list(range(1990, 1991)),
         master_directory="./datos_inei",
         parallel_jobs=6,
     )
-    mod_endes = endes.fetch_modules()
+    mod_endes = endes.fetch_all_modules()
+    xxx
 
     mod_endes.download_zips(
         formats=["spss", "dbf", "stata", "csv"], module_codes=[64, 65, 73, 74]
     )
 
-    mod_endes.organize_files(
-        organize_by="year", keep_original_names=True, operation="copy"
-    )
-    mod_endes.organize_files(
-        organize_by="module", keep_original_names=True, operation="copy"
-    )
+    # mod_endes.organize_files(
+    #     organize_by="year", keep_original_names=True, operation="copy"
+    # )
+    # mod_endes.organize_files(
+    #     organize_by="module", keep_original_names=True, operation="copy"
+    # )
 
     # Ejemplo: ENAHO
     inei = MicrodatosINEIFetcher(
@@ -477,18 +483,18 @@ if __name__ == "__main__":
         master_directory="./datos_inei",
         parallel_jobs=2,
     )
-    mod_inei = inei.fetch_modules()
+    mod_inei = inei.fetch_all_modules()
 
     mod_inei.download_zips(
         formats=["csv", "stata", "spss", "dbf"], module_codes=[1, 13, 22, 34]
     )
 
-    mod_inei.organize_files(
-        organize_by="year", keep_original_names=True, operation="copy"
-    )
-    mod_inei.organize_files(
-        organize_by="module", keep_original_names=True, operation="copy"
-    )
+    # mod_inei.organize_files(
+    #     organize_by="year", keep_original_names=True, operation="copy"
+    # )
+    # mod_inei.organize_files(
+    #     organize_by="module", keep_original_names=True, operation="copy"
+    # )
     # Ejemplo: ENAPRES
     enapres = MicrodatosINEIFetcher(
         survey="enapres",
@@ -496,15 +502,15 @@ if __name__ == "__main__":
         master_directory="./datos_inei",
         parallel_jobs=2,
     )
-    mod_enapres = enapres.fetch_modules()
+    mod_enapres = enapres.fetch_all_modules()
 
     mod_enapres.download_zips(
         formats=["stata", "csv", "spss", "dbf"], module_codes=[101, 102, 111]
     )
 
-    mod_enapres.organize_files(
-        organize_by="year", keep_original_names=True, operation="copy"
-    )
-    mod_enapres.organize_files(
-        organize_by="module", keep_original_names=True, operation="copy"
-    )
+    # mod_enapres.organize_files(
+    #     organize_by="year", keep_original_names=True, operation="copy"
+    # )
+    # mod_enapres.organize_files(
+    #     organize_by="module", keep_original_names=True, operation="copy"
+    # )
