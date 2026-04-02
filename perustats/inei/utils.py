@@ -4,21 +4,63 @@ Utility functions for INEI Microdatos Fetcher.
 
 import hashlib
 import re
+import sqlite3
 import subprocess
 import unicodedata
 import zipfile
 from pathlib import Path
-from typing import Optional
 from urllib.parse import quote
 
 import pandas as pd
 from bs4 import BeautifulSoup
 
-from .constants import BASE_URL, SESSION_COOKIE, SURVEYS_CONFIG, USER_AGENT
+from .constants import (
+    BASE_URL,
+    CACHE_MICRODATOS,
+    COLS_PROGRESS,
+    SESSION_COOKIE,
+    SURVEYS,
+    USER_AGENT,
+)
 
 
-# Encuesta%20Demogr%E1fica%20y%20de%20Salud%20Familiar%20-%20ENDES
-# Encuesta%20Demogr%C3%A1fica%20y%20de%20Salud%20Familiar%20-%20ENDES&_cmbAnno=2011&_cmbTrimestre=5'
+def get_modules_details(survey, year, periodo, conn: sqlite3.Connection):
+    query = f"""
+    SELECT * FROM {CACHE_MICRODATOS}
+    WHERE survey = ? AND year = ? AND periodo = ?
+        """
+    try:
+        df_cache = pd.read_sql(query, conn, params=(survey, year, periodo))
+        if not df_cache.empty:
+            return df_cache
+    except Exception:
+        pass
+    df = get_survey_details(survey=survey, year=year, periodo=periodo)
+    df.to_sql(CACHE_MICRODATOS, con=conn, index=False)
+    return df
+
+
+def create_environment(survey: str, master_directory: str, referrer_sql=None):
+    master_directory = Path(master_directory) / survey
+
+    zips_directory = master_directory / "0_zips"
+    unzipped_directory = master_directory / "1_unzipped"
+    organized_directory = master_directory / "2_organized"
+
+    dirs = dict(
+        zips=zips_directory,
+        unzip=unzipped_directory,
+        organized=organized_directory,
+    )
+    for key, directory in dirs.items():
+        directory.mkdir(parents=True, exist_ok=True)
+    if referrer_sql is None:
+        referrer_sql = "referrer.sql"
+    sqlite_path = master_directory / referrer_sql
+    conn = sqlite3.connect(sqlite_path)
+    return dirs, conn
+
+
 def slugify(text: str) -> str:
     """
     Convert text to a safe format for filenames without accents or special characters.
@@ -78,10 +120,9 @@ def html_to_dataframe(html: str) -> pd.DataFrame:
         DataFrame containing parsed module information
     """
     soup = BeautifulSoup(html, "html.parser")
-    table = soup.find("table")
+    table = soup.find("table").find("table")
     if table is None:
         return pd.DataFrame()
-
     rows = table.find_all("tr")
     if len(rows) <= 1:
         return pd.DataFrame()
@@ -127,8 +168,8 @@ def html_to_dataframe(html: str) -> pd.DataFrame:
         data.append(
             {
                 "number": number,
-                "year": year,
-                "period": period,
+                "year_ref": year,
+                "period_ref": period,
                 "survey_code": survey_code,
                 "survey_name": survey_name,
                 "module_code": module_code,
@@ -141,8 +182,10 @@ def html_to_dataframe(html: str) -> pd.DataFrame:
 
 
 def extract_periodo_value(html: str, periodo="anual") -> str | None:
+    """
+    Se extrae los periodos/regiones disponibles de los "anios" y se seleccioa un tipo (por defecto anual)
+    """
     soup = BeautifulSoup(html, "html.parser")
-    # print(soup)
     options = soup.find_all("option")
 
     for opt in options:
@@ -157,7 +200,7 @@ def extract_periodo_value(html: str, periodo="anual") -> str | None:
     return None
 
 
-def deep_execute_curl_survey_request(survey: str, year: int, periodo="anual") -> str:
+def get_period_value(survey: str, year: int, periodo="anual") -> str:
     """
     Execute curl request to fetch survey data from INEI.
 
@@ -172,18 +215,17 @@ def deep_execute_curl_survey_request(survey: str, year: int, periodo="anual") ->
     Raises:
         ValueError: If survey type is not supported
     """
-    if survey not in SURVEYS_CONFIG:
-        raise ValueError(f"Survey not supported: {survey}")
+    config = SURVEYS.get(periodo).get(survey)
 
-    config = SURVEYS_CONFIG[survey]
     encoded_name = url_encode_survey_name(config["name"])
 
     data_raw = f"bandera=1&_cmbEncuesta={encoded_name}&_cmbAnno={year}&_cmbEncuesta0={encoded_name}"
 
+    url = BASE_URL.get("consulta")
     cmd = [
         "curl",
         "-s",
-        f"{BASE_URL}/CambiaAnio.asp",
+        f"{url}/CambiaAnio.asp",
         "-H",
         "Accept: */*",
         "-H",
@@ -195,9 +237,9 @@ def deep_execute_curl_survey_request(survey: str, year: int, periodo="anual") ->
         "-b",
         SESSION_COOKIE,
         "-H",
-        f"Origin: {BASE_URL}",
+        f"Origin: {url}",
         "-H",
-        f"Referer: {BASE_URL}/Consulta_por_Encuesta.asp",
+        f"Referer: {url}/Consulta_por_Encuesta.asp",
         "-H",
         "Sec-Fetch-Dest: empty",
         "-H",
@@ -218,30 +260,17 @@ def deep_execute_curl_survey_request(survey: str, year: int, periodo="anual") ->
     # print(cmd)
     result = subprocess.run(cmd, capture_output=True)
     html = result.stdout.decode("utf-8", errors="ignore")
-    quarter = extract_periodo_value(html, periodo=periodo)
-    return quarter
+    period = extract_periodo_value(html, periodo=periodo)
+    return period
 
 
-def to_curl_cmd(cmd: list[str]) -> str:
-    out = []
-    for c in cmd:
-        if " " in c or '"' in c:
-            c = c.replace('"', r"\"")
-            c = f'"{c}"'
-        out.append(c)
-    return " ^\n  ".join(out)
-
-
-def execute_curl_survey_request(
-    survey: str, year: int, quarter: Optional[str] = None
-) -> str:
+def get_survey_details(survey: str, year: int, periodo: str = "anual") -> pd.DataFrame:
     """
     Execute curl request to fetch survey data from INEI.
 
     Args:
-        survey: Survey type (enaho, endes, enapres)
+        survey: Survey type (enaho, endes, enapres, ...)
         year: Year to fetch
-        quarter: Optional quarter override
 
     Returns:
         HTML response from INEI
@@ -249,21 +278,23 @@ def execute_curl_survey_request(
     Raises:
         ValueError: If survey type is not supported
     """
-    if survey not in SURVEYS_CONFIG:
+    SURVEYS_CONFIG = SURVEYS.get(periodo)
+    if survey not in SURVEYS_CONFIG.keys():
         raise ValueError(f"Survey not supported: {survey}")
 
     config = SURVEYS_CONFIG[survey]
-    quarter = quarter or config["default_quarter"]
+    quarter = get_period_value(survey, year, periodo)
     encoded_name = url_encode_survey_name(config["name"])
 
     data_raw = (
         f"bandera=1&_cmbEncuesta={encoded_name}&_cmbAnno={year}&_cmbTrimestre={quarter}"
     )
+    url = BASE_URL.get("consulta")
 
     cmd = [
         "curl",
         "-s",
-        f"{BASE_URL}/cambiaPeriodo.asp",
+        f"{url}/cambiaPeriodo.asp",
         "-H",
         "Accept: */*",
         "-H",
@@ -275,9 +306,9 @@ def execute_curl_survey_request(
         "-b",
         SESSION_COOKIE,
         "-H",
-        f"Origin: {BASE_URL}",
+        f"Origin: {url}",
         "-H",
-        f"Referer: {BASE_URL}/Consulta_por_Encuesta.asp",
+        f"Referer: {url}/Consulta_por_Encuesta.asp",
         "-H",
         "Sec-Fetch-Dest: empty",
         "-H",
@@ -295,9 +326,23 @@ def execute_curl_survey_request(
         "--data-raw",
         data_raw,
     ]
-    # print(to_curl_cmd(cmd))
     result = subprocess.run(cmd, capture_output=True)
-    return result.stdout.decode("utf-8", errors="ignore")
+    df = html_to_dataframe(result.stdout.decode("utf-8", errors="ignore"))
+    df["survey"] = survey
+    df["year"] = year
+    df["periodo"] = periodo
+    df = set_default_progress(df)
+    return df
+
+
+def to_curl_cmd(cmd: list[str]) -> str:
+    out = []
+    for c in cmd:
+        if " " in c or '"' in c:
+            c = c.replace('"', r"\"")
+            c = f'"{c}"'
+        out.append(c)
+    return " ^\n  ".join(out)
 
 
 def _file_hash(path: Path, chunk_size: int = 1 << 20) -> str:
@@ -307,3 +352,9 @@ def _file_hash(path: Path, chunk_size: int = 1 << 20) -> str:
         for chunk in iter(lambda: f.read(chunk_size), b""):
             h.update(chunk)
     return h.hexdigest()
+
+
+def set_default_progress(df):
+    for col in COLS_PROGRESS:
+        df[col] = False
+    return df

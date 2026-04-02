@@ -7,7 +7,6 @@ import shutil
 import subprocess
 import time
 import zipfile
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import List, Literal
 
@@ -20,15 +19,13 @@ from rich.progress import (
     SpinnerColumn,
     TaskProgressColumn,
     TextColumn,
-    TimeElapsedColumn,
 )
 
-from .constants import BASE_URL, RELEVANT_EXTENSIONS
+from .constants import CACHE_MICRODATOS, RELEVANT_EXTENSIONS
 from .utils import (
     _file_hash,
-    deep_execute_curl_survey_request,
-    execute_curl_survey_request,
-    html_to_dataframe,
+    create_environment,
+    get_modules_details,
     is_zip_valid,
     slugify,
 )
@@ -36,9 +33,6 @@ from .utils import (
 console = Console()
 
 
-# importantes
-# self.modules_dataframe: representa los modulos existentes para esos anios
-# self.documentation_map: representa archivos unicos que estan en otros directorios
 class MicrodatosINEIFetcher:
     """
     Fetcher for downloading and organizing INEI microdatos (microdata) .
@@ -52,10 +46,18 @@ class MicrodatosINEIFetcher:
 
     def __init__(
         self,
-        survey: Literal["enaho", "endes", "enapres"],
+        survey: Literal["enaho", "endes", "enapres", "renamu"],
         years: List[int],
+        period="anual",
         master_directory: str = "./microdatos_inei",
         parallel_jobs: int = 2,
+        sql_file: str = None,
+        prefered_order_formats: Literal["stata", "spss", "csv", "dbf"] = [
+            "stata",
+            "spss",
+            "csv",
+            "dbf",
+        ],
     ):
         """
         Initialize the INEI microdatos fetcher.
@@ -68,34 +70,27 @@ class MicrodatosINEIFetcher:
         """
         self.survey = survey
         self.years = years
-        self.master_directory = Path(master_directory) / survey
+        self.dirs, self.conn = create_environment(survey, master_directory, sql_file)
+        self.period = period
+        self.formats = prefered_order_formats
+
         self.parallel_jobs = parallel_jobs
-        self.modules_dataframe = pd.DataFrame()
-        self.zips_directory = self.master_directory / "0_zips"
-        self.unzipped_directory = self.master_directory / "1_unzipped"
-        self.organized_directory = self.master_directory / "2_organized"
         self.zip_maps = []
 
-    def fetch_modules(self, periodo=None):
+    def _fetch_detail(self, year):
+        """
+        Extrae la tabla de modulos para ese anio, consultando la cache primero
+        """
+        df = get_modules_details(self.survey, year, self.period)
+        return df
+
+    def fetch_all_modules(self):
         """
         Fetch available modules for all specified years.
 
         Returns:
             Self for method chaining
         """
-
-        def _fetch_year(year) -> pd.DataFrame:
-
-            if periodo is None:
-                html = execute_curl_survey_request(self.survey, year)
-            else:
-                qt = deep_execute_curl_survey_request(self.survey, year, periodo)
-                # print(qt)
-                html = execute_curl_survey_request(self.survey, year, qt)
-                # print(html[:400])
-            df = html_to_dataframe(html)
-            # print(df)
-            return df
 
         results = []
 
@@ -110,19 +105,34 @@ class MicrodatosINEIFetcher:
                 f"[cyan]Fetching [yellow]{self.survey.upper()} [cyan]modules...",
                 total=len(self.years),
             )
-
-            # from tqdm import tqdm
-
             for year in self.years:
-                results.append(_fetch_year(year))
+                results.append(self._fetch_detail(year))
                 progress.update(task, advance=1)
 
-        self.modules_dataframe = pd.concat(results, ignore_index=True).drop_duplicates()
+        df = pd.concat(results, ignore_index=True).drop_duplicates()
+        # rutas de descarga
+        df["module_code"] = df["module_code"].astype(str).str.zfill(4)
+        df["url"] = df[self.formats].bfill(axis=1).iloc[:, 0]
+        df["path_download"] = df.apply(
+            lambda row: (
+                self.dirs.get("zips")
+                / f"{row['year_ref']}_mod_{row['module_code']}.zip"
+            ),
+            axis=1,
+        )
+        df["path_extract"] = df.apply(
+            lambda row: (
+                self.dirs.get("unzip") / f"{row['year_ref']}_mod_{row['module_code']}"
+            ),
+            axis=1,
+        )
+        self.modules_dataframe = df
+        df.to_sql(CACHE_MICRODATOS, con=self.conn, index=False)
         return self
 
-    def _download_single(self, task_info: dict) -> bool:
-        url = task_info["url"]
-        zip_path = task_info["zip_path"]
+    def _download_single(self, row: dict) -> bool:
+        url = row["url"]
+        zip_path = row["path_download"]
 
         try:
             cmd = [
@@ -152,6 +162,7 @@ class MicrodatosINEIFetcher:
                 pass
 
             try:
+                # segundo intento usando
                 r = requests.get(url, stream=True, timeout=60)
                 r.raise_for_status()
 
@@ -173,10 +184,9 @@ class MicrodatosINEIFetcher:
 
     def download_zips(
         self,
-        formats: List[str] = ["stata", "spss", "csv"],
-        force_download: bool = True,
         module_codes: List[int] = [],
         remove_zip_after_extract: bool = False,
+        force_download: bool = True,
     ) -> "MicrodatosINEIFetcher":
         """
         Download ZIP files for specified modules.
@@ -190,80 +200,46 @@ class MicrodatosINEIFetcher:
         Returns:
             Self for method chaining
         """
-        os.makedirs(self.zips_directory, exist_ok=True)
-        os.makedirs(self.unzipped_directory, exist_ok=True)
 
         # Filter by module codes if specified
-        filtered_modules = [str(x).zfill(3) for x in module_codes]
+        filtered_modules = [str(x).zfill(4) for x in module_codes]
         df = self.modules_dataframe.copy()
-        df["module_code"] = df["module_code"].astype(str).str.zfill(3)
+
         if filtered_modules:
             df = df.query("module_code in @filtered_modules")
 
-        # Prepare download map
-        download_tasks = []
         for _, row in df.iterrows():
-            url = None
-            for fmt in formats:
-                if pd.notna(row[fmt]):
-                    url = f"{BASE_URL}/{row[fmt]}"
-                    break
-            if not url:
-                continue
-            year = str(row["year"])
-            module = row["module_code"]
-            zip_path = self.zips_directory / f"{year}_mod_{module}.zip"
-            extract_path = self.unzipped_directory / f"{year}_mod_{module}"
-
-            if force_download or not zip_path.exists():
-                download_tasks.append(
-                    {"url": url, "zip_path": zip_path, "extract_path": extract_path}
-                )
-            self.zip_maps.append((zip_path, extract_path))
-
-        if not download_tasks:
-            console.print("[yellow]No files to download[/yellow]")
-            return self
-
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            BarColumn(),
-            TaskProgressColumn(),
-            TimeElapsedColumn(),
-            console=console,
-        ) as progress:
-            task = progress.add_task(
-                f"[yellow]{self.survey.upper()}: [cyan]Downloading {len(download_tasks)} ZIP files...",
-                total=len(download_tasks),
-            )
-            with ThreadPoolExecutor(max_workers=self.parallel_jobs) as ex:
-                futures = [ex.submit(self._download_single, t) for t in download_tasks]
-
-                for _ in as_completed(futures):
-                    progress.advance(task, 1)
-
-        # Extract files
-        self._extract_zips(remove_zip_after_extract)
+            r = self._download_single(row)
+            if r:
+                # update la columna del sql downloaded a true para el row[url]
+                # extraer
+                status = self._extract_zips(row, remove_zip_after_extract)
+                # actualiar ell extracted y deleted en el sql
+                pass
 
         return self
 
-    def _extract_zips(self, remove_after: bool = False) -> None:
+    def _extract_zips(self, row: dict, remove_after: bool = False) -> None:
         """
         Extract downloaded ZIP files.
 
         Args:
             remove_after: Delete ZIP files after extraction
         """
-        zips_routes = self.zip_maps
-
-        for zip_route, zip_destination in zips_routes:
-            if not zip_destination.exists():
-                with zipfile.ZipFile(zip_route, "r") as zip_file:
-                    zip_file.extractall(zip_destination)
-
+        zip_local = Path(row.get("path_download"))
+        zip_destination = Path(row.get("path_extract"))
+        extracted = False
+        deleted = False
+        if zip_local.exists():
+            if zip_destination.exists():
+                zip_destination.unlink()
+            with zipfile.ZipFile(zip_local, "r") as zip_file:
+                zip_file.extractall(zip_destination)
+                extracted = True
                 if remove_after:
-                    zip_route.unlink(missing_ok=True)
+                    zip_local.unlink()
+                    deleted = True
+        return dict(extrated=extracted, deleted=deleted)
 
     def organize_files(
         self,
