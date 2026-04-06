@@ -54,3 +54,9 @@ include = ["perustats*"]
 
 [tool.ruff]
 exclude = ["*.ipynb", ".venv", "build", "data"]
+
+[dependency-groups]
+dev = [
+    "mkdocs-material>=9.7.6",
+    "mkdocstrings[python]>=0.30.1",
+]
