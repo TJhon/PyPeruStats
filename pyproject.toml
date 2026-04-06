@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "perustats"
-version = "0.1.6"
+version = "0.1.7"
 description = "Tools to download and process public datasets from Peru (INEI & BCRP)."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -21,13 +21,16 @@ license-files = ["LICENSE"]
 dependencies = [
   "bs4",
   "httpx",
+  "ipykernel>=6.31.0",
   "joblib",
   "lxml",
   "pandas",
+  "polars>=1.36.1",
+  "pyarrow>=21.0.0",
   "requests",
   "rich",
   "tqdm",
-  "unidecode"
+  "unidecode",
 ]
 
 classifiers = [
@@ -51,3 +54,9 @@ include = ["perustats*"]
 
 [tool.ruff]
 exclude = ["*.ipynb", ".venv", "build", "data"]
+
+[dependency-groups]
+dev = [
+    "mkdocs-material>=9.7.6",
+    "mkdocstrings[python]>=0.30.1",
+]

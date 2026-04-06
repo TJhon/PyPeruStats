@@ -1,0 +1,8 @@
+BASE_URL = "https://infogob.jne.gob.pe"
+URL_ELECCIONES = f"{BASE_URL}/Eleccion"
+URL_LISTAR_ELECCIONES = f"{BASE_URL}/Eleccion/ListarElecciones"
+URL_FICHA_ELECCION = f"{BASE_URL}/Eleccion/FichaEleccion"
+URL_RESULTADOS_ELECCION = f"{BASE_URL}/Eleccion/_CandidatosResultadosEleccion"
+URL_LISTAR_PROVINCIAS = f"{BASE_URL}/Eleccion/ListarProvincias"
+URL_LISTAR_DISTRITOS = f"{BASE_URL}/Eleccion/ListarDistritos"
+URL_LISTAR_RESULTADOS = f"{BASE_URL}/Eleccion/RecuperarDatosCandidatosResultados"

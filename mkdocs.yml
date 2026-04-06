@@ -1,0 +1,89 @@
+site_name: PyPeruStats
+site_description: Python tools to download and process public datasets from Peru — INEI, BCRP, SIAF, MTC, PRODUCE, SUNEDU and more.
+site_author: Jhon K. Flores Rojas
+site_url: https://tjhon.github.io/PyPeruStats/
+repo_url: https://github.com/TJhon/PyPeruStats
+repo_name: TJhon/PyPeruStats
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep orange
+      accent: red
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep orange
+      accent: red
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font:
+    text: IBM Plex Sans
+    code: JetBrains Mono
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.tracking
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - toc.follow
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: numpy
+            show_source: true
+            show_root_heading: true
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - INEI Microdata:
+      - Overview: inei/index.md
+      - Installation & Quickstart: inei/quickstart.md
+      - INEIFetcher Reference: inei/fetcher.md
+      - Survey Registry: inei/surveys.md
+      - Directory Structure: inei/structure.md
+      - Examples: inei/examples.md
+  - BCRP:
+      - Overview: bcrp/index.md
+  - SIAF:
+      - Overview: siaf/index.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/TJhon/PyPeruStats
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/perustats/

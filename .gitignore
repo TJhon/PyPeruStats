@@ -1,7 +1,11 @@
+*html
 test_data/
 data_inei/
+data/
 trash_zips/
 _update_data.py
+test/*
+test*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 trash/
