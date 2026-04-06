@@ -1,47 +1,41 @@
-# === CONFIGURACIÓN GLOBAL ===
-
-# SURVEYS
-## anuales
-
-SURVERY_Y = dict(
-    enaho=dict(name="Condiciones de Vida y Pobreza - ENAHO"),
-    enapres=dict(name="Encuesta Nacional de Programas Presupuestales - ENAPRES"),
-    endes=dict(name="Encuesta Demográfica y de Salud Familiar - ENDES"),
-    renamu=dict(name="Registro Nacional de Municipalidades - RENAMU"),
-)
-
-## otros
-
-## todas las encuestas
-
-SURVEYS = dict(anual=SURVERY_Y)
-
-SESSION_COOKIE = "ASPSESSIONIDACGTQQBC=GJEEJPNCPHOBIIDCFFDOKFNM"
-USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 OPR/124.0.0.0"
+"""
+Global configuration constants for the INEI microdata fetcher.
+Survey definitions have moved to surveys/registry.py.
+"""
 
 BASE_URL = dict(
     consulta="https://proyectos.inei.gob.pe/microdatos",
     descarga="https://proyectos.inei.gob.pe/",
 )
 
+SESSION_COOKIE = "ASPSESSIONIDACGTQQBC=GJEEJPNCPHOBIIDCFFDOKFNM"
+USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/140.0.0.0 Safari/537.36 OPR/124.0.0.0"
+)
 
-# File extensions for data files
+# File extensions treated as data files during organize step
 RELEVANT_EXTENSIONS = {".csv", ".sav", ".dta", ".dbf"}
 
-# Save files
+# File extensions treated as documentation
+DOC_EXTENSIONS = {".pdf", ".doc", ".docx", ".ppt", ".pptx", ".xls", ".xlsx", ".odt"}
+
+# SQLite table name used for caching module lists
 CACHE_MICRODATOS = "inei_microdatos"
 
-## Track de progreso
-
-COLS_PROGRESS = [
+# Progress-tracking columns stored in the DB alongside each module row
+PROGRESS_COLUMNS = [
     "url",
     "path_download",
     "path_extract",
-    "path_orden",
+    "path_organized",
     "downloaded",
     "unzipped",
     "organized",
     "removed_zip",
 ]
 
-PERIODOS_NAMES = dict(anual=["anual", "unico"])
+# Supported download formats in the order they appear in the INEI table
+FORMAT_COLUMNS = ("spss", "stata", "csv", "dbf")
+DEFAULT_FORMAT_PREFERENCE = ["stata", "spss", "csv", "dbf"]
