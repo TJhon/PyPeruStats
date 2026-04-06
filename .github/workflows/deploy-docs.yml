@@ -31,7 +31,8 @@ jobs:
             mkdocs-material \
             mkdocs-material[imaging] \
             mkdocs-minify-plugin \
-            pymdown-extensions
+            pymdown-extensions \
+            mkdocstrings[python]
 
       - name: Configure Git for GitHub Pages
         run: |
