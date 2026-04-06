@@ -57,16 +57,6 @@ data = processor.process_data()
 
 ---
 
-## License
-
-PeruStats is released under the **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)** license.
-
-You are free to use, share, and adapt this software for **non-commercial purposes**, provided you give appropriate credit. Commercial use requires explicit written permission from the author.
-
-[Read the full license →](https://creativecommons.org/licenses/by-nc/4.0/)
-
----
-
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request on [GitHub](https://github.com/TJhon/PyPeruStats).
