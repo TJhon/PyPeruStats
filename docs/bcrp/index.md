@@ -1,42 +1,80 @@
-# BCRP Time Series
+# BCRP — Central Reserve Bank of Peru
 
-!!! warning "Documentation in progress"
-    This page is a placeholder. Full documentation for `perustats.bcrp` will be added when the source code is finalized.
-
-The `perustats.bcrp` module retrieves time-series data from the **Banco Central de Reserva del Perú (BCRP)** statistical portal.
+The `BCRP` module lets you download, cache, and work with **any time-series published by the Peruvian Central Reserve Bank** through its public statistics API.
 
 ---
 
-## Planned Features
+## What it does
 
-- Retrieval of daily, monthly, quarterly, and annual series by code.
-- Automatic parsing of BCRP's non-standard Spanish date formats (`"Ene05"`, `"T113"`, `"31Ene05"` …).
-- Parallel processing of multiple series codes.
-- Built-in SQLite caching.
-- Output as tidy `pandas` DataFrames keyed by frequency (`"D"`, `"M"`, `"Q"`, `"A"`).
+| Capability | Details |
+|---|---|
+| **Fetch data** | Pulls one or many series in a single HTTP call |
+| **Multi-frequency** | Daily (`D`), Monthly (`M`), Quarterly (`Q`), Annual (`A`) |
+| **Metadata validation** | Warns about unknown codes *before* making any API request |
+| **SQLite caching** | Re-running with the same parameters hits the local cache, not the network |
+| **Pandas-ready** | Returns tidy `DataFrame` objects with a `datetime` index |
 
 ---
 
-## Quick Preview
+## Architecture overview
 
-```python
-from perustats import BCRPDataProcessor
-
-processor = BCRPDataProcessor(
-    series=["PD38032DD", "RD38085BM", "PD37940PQ"],
-    start_date="2005-01-01",
-    end_date="2023-12-31",
-    parallel=True,
-)
-
-data = processor.process_data(save_sqlite=True)
-
-daily_df     = data.get("D")
-monthly_df   = data.get("M")
-quarterly_df = data.get("Q")
-annual_df    = data.get("A")
+```
+BCRPSeries          ← define your query (codes + date range)
+    │
+    ▼
+BCRPDataSeries      ← orchestrates fetch, cache, and date parsing
+    ├── BCRPMetadata   validates codes against the scraped catalogue
+    └── BCRPCache      reads / writes the SQLite cache
 ```
 
 ---
 
-Check back soon for the full API reference.
+## Quick example
+
+```python
+from perustats.BCRP.models import BCRPSeries
+from perustats.BCRP.fetcher import BCRPDataSeries
+
+series = BCRPSeries(
+    codes=["RD16085DA", "PD04657MD", "RD14266DQ"],
+    start_date="2015-01-01",
+    end_date="2024-12-31",
+)
+
+result = BCRPDataSeries(series).fetch_data()
+
+# result.result is a dict keyed by frequency
+daily_df     = result.result["D"]
+monthly_df   = result.result["M"]
+quarterly_df = result.result["Q"]
+
+print(daily_df.head())
+```
+
+---
+
+## Series code format
+
+Every BCRP series code encodes its own frequency in the **last character**:
+
+| Suffix | Frequency |
+|---|---|
+| `D` | Daily |
+| `M` | Monthly |
+| `Q` | Quarterly |
+| `A` | Annual |
+
+Example: `RD16085D**A**` → annual series. The library reads this suffix automatically and routes each code to the correct API endpoint and date format.
+
+---
+
+## Pages in this section
+
+| Page | Description |
+|---|---|
+| [Quickstart](quickstart.md) | Installation and a working end-to-end example |
+| [BCRPDataSeries](fetcher.md) | Full API reference for the main fetcher class |
+| [BCRPSeries model](series.md) | Query model — codes, date range, and frequency grouping |
+| [BCRPMetadata](metadata.md) | Catalogue management and code search |
+| [BCRPCache](cache.md) | SQLite cache internals |
+| [Examples](examples.md) | Real-world usage patterns |
