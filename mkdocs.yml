@@ -78,6 +78,12 @@ nav:
       - Examples: inei/examples.md
   - BCRP:
       - Overview: bcrp/index.md
+      - Installation & Quickstart: bcrp/quickstart.md
+      - BCRPDataSeries Reference: bcrp/fetcher.md
+      - BCRPSeries Model: bcrp/series.md
+      - BCRPMetadata Reference: bcrp/metadata.md
+      - BCRPCache Reference: bcrp/cache.md
+      - Examples: bcrp/examples.md
   - SIAF:
       - Overview: siaf/index.md
 
