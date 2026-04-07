@@ -3,8 +3,8 @@ import time
 import pandas as pd
 from tqdm import tqdm
 
-from perustats.BCRP.backup.utils import get_connection
-from perustats.BCRP.constants import DATE_RANGES, RELEASES, SERIES_TABLE
+from perustats.BCRP.archive.constants import DATE_RANGES, RELEASES, SERIES_TABLE
+from perustats.BCRP.archive.utils import get_connection
 from perustats.BCRP.fetcher import BCRPDataProcessor
 
 conn = get_connection()

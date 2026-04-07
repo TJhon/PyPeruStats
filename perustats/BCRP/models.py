@@ -8,6 +8,8 @@ from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
 
+CACHE_DB: str = "./data/bcrp_cache.db"
+
 # ---------------------------------------------------------------------------
 # API
 # ---------------------------------------------------------------------------
@@ -130,7 +132,7 @@ def _format_date_for_frequency(
 
 
 @dataclass
-class SeriesRequest:
+class BCRPSeries:
     """
     A single batched request to the BCRP API.
 

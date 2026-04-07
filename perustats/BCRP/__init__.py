@@ -1,1 +1,1 @@
-from .fetcher import BCRPDataProcessor
+from .fetcher import BCRPDataSeries

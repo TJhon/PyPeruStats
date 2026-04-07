@@ -27,9 +27,11 @@ from typing import Optional
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
+from rich import print
 from tqdm import tqdm
 
 from .models import (
+    CACHE_DB,
     CLASS_DIV_DROPDOWN,
     FREQ_WEB_LABELS,
     FREQ_WEB_MAP,
@@ -46,7 +48,9 @@ logger = logging.getLogger(__name__)
 
 def _clean_text(text: str) -> str:
     """Collapse whitespace and strip leading/trailing spaces."""
-    return re.sub(r"\s+", " ", text).strip()
+    text = re.sub(r"\s+", " ", text).strip()
+    text = re.sub(r"\s*-\s*\(\d+ series\).*$", "", text).strip()
+    return text
 
 
 def _parse_series_table(table) -> pd.DataFrame:
@@ -206,7 +210,7 @@ class BCRPMetadata:
     >>> meta.search("inflacion") # returns matching rows (future use)
     """
 
-    def __init__(self, db_path: str = "./data/bcrp_cache.db") -> None:
+    def __init__(self, db_path: str = CACHE_DB) -> None:
 
         self._db_path = Path(db_path)
         self._df: Optional[pd.DataFrame] = None
@@ -278,7 +282,16 @@ class BCRPMetadata:
         valid, invalid = [], []
 
         for code in codes:
-            (valid if code.strip().upper() in known else invalid).append(code)
+            (valid if code.strip().upper() in known else invalid).append(
+                code.upper().strip()
+            )
+
+        _df_codes = self._df.query("code in @valid")
+        # print({"valids": valid})
+        names_codes = {}
+        for i, row in _df_codes.iterrows():
+            name = row.get("group") + " - " + row.get("description")
+            names_codes[name] = row["code"].lower()
 
         if invalid:
             import warnings
@@ -290,7 +303,7 @@ class BCRPMetadata:
                 stacklevel=3,
             )
 
-        return valid, invalid
+        return valid, names_codes, _df_codes, invalid
 
     # ------------------------------------------------------------------
     # Introspection helpers (ready for future search integration)

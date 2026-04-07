@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 import requests
 
-from perustats.BCRP.constants import DB_PATH
+from perustats.BCRP.archive.constants import DB_PATH
 from perustats.BCRP.models import BASE_API_URL
 
 
@@ -66,7 +66,7 @@ def get_data_api(codes, start_date, end_date):
     return response
 
 
-def json_to_df(json):
+def json_to_df(json, codes):
     """
     Convert BCRP API JSON response to a pandas DataFrame.
 
@@ -82,6 +82,7 @@ def json_to_df(json):
         - Converts series values to numeric, handling errors gracefully
     """
     series_names = [serie["name"] for serie in json["config"]["series"]]
+    series_names = codes
     periods = json["periods"]
     df = pd.DataFrame(
         [

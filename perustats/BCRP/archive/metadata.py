@@ -3,19 +3,19 @@ import requests
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 
-from perustats.BCRP.backup.utils import (
-    active_codes,
-    clean_text,
-    get_connection,
-    parse_series_table,
-)
-from perustats.BCRP.constants import (
+from perustats.BCRP.archive.constants import (
     CLASS_DIV_DROPDOWN,
     FREQ,
     FREQ_MAP,
     GROUP_SIZE,
     SERIES_TABLE,
     SERIES_URL,
+)
+from perustats.BCRP.archive.utils import (
+    active_codes,
+    clean_text,
+    get_connection,
+    parse_series_table,
 )
 
 all_df = []
