@@ -12,11 +12,11 @@ pip install perustats
 
 ## Data Sources
 
-| Module | Source | Status |
-|--------|--------|--------|
-| `perustats.inei` | INEI — National microdata surveys (ENAHO, ENDES, ENAPRES, RENAMU …) | ✅ Available |
-| `perustats.bcrp` | BCRP — Central Bank time series | ✅ Available |
-| `perustats.siaf` | MEF/SIAF — Public expenditure data | 🚧 Coming soon |
+| Module           | Source                                                              | Status         |
+| ---------------- | ------------------------------------------------------------------- | -------------- |
+| `perustats.inei` | INEI — National microdata surveys (ENAHO, ENDES, ENAPRES, RENAMU …) | ✅ Available   |
+| `perustats.bcrp` | BCRP — Central Bank time series                                     | ✅ Available   |
+| `perustats.siaf` | MEF/SIAF — Public expenditure data                                  | 🚧 Coming soon |
 
 ---
 
@@ -44,15 +44,30 @@ fetcher = INEIFetcher(
 ### BCRP Time Series
 
 ```python
-from perustats import BCRPDataProcessor
+from perustats import BCRPDataSeries, BCRPSeries
 
-processor = BCRPDataProcessor(
-    ["PD38032DD", "RD38085BM"],
-    start_date="2010-01-01",
-    end_date="2023-12-31",
-    parallel=True,
+series = BCRPSeries(
+    [
+        " RD16085DA",
+        "PD04657MD",
+        "PD04646PD",
+        "RD13761DM",
+        "RD13805DM",
+        "      RD13845DM",
+        "RD15478DQ",
+        "RD14266DQ",
+        "CD10401DA",
+        "CD10422DA",
+        "fakecodeA",
+    ],
+    start_date="2000-01-02",
+    end_date="2020-01-01",
 )
-data = processor.process_data()
+data = BCRPDataSeries(series).fetch_data()
+
+for freq in data.result.keys():
+    print(data.result.get(freq))
+
 ```
 
 ---

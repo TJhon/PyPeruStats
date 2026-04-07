@@ -10,6 +10,7 @@ test*
 __pycache__/
 trash/
 *.py[cod]
+.cache/
 *$py.class
 cache/
 # C extensions
