@@ -20,15 +20,18 @@ license-files = ["LICENSE"]
 
 dependencies = [
   "bs4",
+  "geopandas>=1.0.1",
   "httpx",
   "ipykernel>=6.31.0",
   "joblib",
   "lxml",
   "pandas",
+  "plotly>=6.7.0",
   "polars>=1.36.1",
   "pyarrow>=21.0.0",
   "requests",
   "rich",
+  "streamlit>=1.50.0",
   "tqdm",
   "unidecode",
 ]
@@ -59,4 +62,5 @@ exclude = ["*.ipynb", ".venv", "build", "data"]
 dev = [
     "mkdocs-material>=9.7.6",
     "mkdocstrings[python]>=0.30.1",
+    "python-dotenv>=1.2.1",
 ]
