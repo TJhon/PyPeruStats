@@ -12,7 +12,7 @@ pip install perustats
 
 ### Documentation
 
-For further details about the package, please refer to the following documentation website: tjhon.github.io/PyPeruStats/
+For further details about the package, please refer to the following documentation website: [PyPeruStats Docs](https://tjhon.github.io/PyPeruStats/)
 
 fr.jhonk@gmail.com
 
