@@ -2,38 +2,90 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://tjhon.github.io/PyPeruStats/</loc>
-         <lastmod>2026-04-06</lastmod>
+         <lastmod>2026-04-15</lastmod>
     </url>
     <url>
          <loc>https://tjhon.github.io/PyPeruStats/bcrp/</loc>
-         <lastmod>2026-04-06</lastmod>
+         <lastmod>2026-04-15</lastmod>
+    </url>
+    <url>
+         <loc>https://tjhon.github.io/PyPeruStats/bcrp/cache/</loc>
+         <lastmod>2026-04-15</lastmod>
+    </url>
+    <url>
+         <loc>https://tjhon.github.io/PyPeruStats/bcrp/examples/</loc>
+         <lastmod>2026-04-15</lastmod>
+    </url>
+    <url>
+         <loc>https://tjhon.github.io/PyPeruStats/bcrp/fetcher/</loc>
+         <lastmod>2026-04-15</lastmod>
+    </url>
+    <url>
+         <loc>https://tjhon.github.io/PyPeruStats/bcrp/metadata/</loc>
+         <lastmod>2026-04-15</lastmod>
+    </url>
+    <url>
+         <loc>https://tjhon.github.io/PyPeruStats/bcrp/quickstart/</loc>
+         <lastmod>2026-04-15</lastmod>
+    </url>
+    <url>
+         <loc>https://tjhon.github.io/PyPeruStats/bcrp/series/</loc>
+         <lastmod>2026-04-15</lastmod>
     </url>
     <url>
          <loc>https://tjhon.github.io/PyPeruStats/inei/</loc>
-         <lastmod>2026-04-06</lastmod>
+         <lastmod>2026-04-15</lastmod>
     </url>
     <url>
          <loc>https://tjhon.github.io/PyPeruStats/inei/examples/</loc>
-         <lastmod>2026-04-06</lastmod>
+         <lastmod>2026-04-15</lastmod>
     </url>
     <url>
          <loc>https://tjhon.github.io/PyPeruStats/inei/fetcher/</loc>
-         <lastmod>2026-04-06</lastmod>
+         <lastmod>2026-04-15</lastmod>
     </url>
     <url>
          <loc>https://tjhon.github.io/PyPeruStats/inei/quickstart/</loc>
-         <lastmod>2026-04-06</lastmod>
+         <lastmod>2026-04-15</lastmod>
     </url>
     <url>
          <loc>https://tjhon.github.io/PyPeruStats/inei/structure/</loc>
-         <lastmod>2026-04-06</lastmod>
+         <lastmod>2026-04-15</lastmod>
     </url>
     <url>
          <loc>https://tjhon.github.io/PyPeruStats/inei/surveys/</loc>
-         <lastmod>2026-04-06</lastmod>
+         <lastmod>2026-04-15</lastmod>
     </url>
     <url>
-         <loc>https://tjhon.github.io/PyPeruStats/siaf/</loc>
-         <lastmod>2026-04-06</lastmod>
+         <loc>https://tjhon.github.io/PyPeruStats/mef/</loc>
+         <lastmod>2026-04-15</lastmod>
+    </url>
+    <url>
+         <loc>https://tjhon.github.io/PyPeruStats/mef/buttons/</loc>
+         <lastmod>2026-04-15</lastmod>
+    </url>
+    <url>
+         <loc>https://tjhon.github.io/PyPeruStats/mef/config/</loc>
+         <lastmod>2026-04-15</lastmod>
+    </url>
+    <url>
+         <loc>https://tjhon.github.io/PyPeruStats/mef/examples/</loc>
+         <lastmod>2026-04-15</lastmod>
+    </url>
+    <url>
+         <loc>https://tjhon.github.io/PyPeruStats/mef/quickstart/</loc>
+         <lastmod>2026-04-15</lastmod>
+    </url>
+    <url>
+         <loc>https://tjhon.github.io/PyPeruStats/mef/scraper/</loc>
+         <lastmod>2026-04-15</lastmod>
+    </url>
+    <url>
+         <loc>https://tjhon.github.io/PyPeruStats/mef/steps/</loc>
+         <lastmod>2026-04-15</lastmod>
+    </url>
+    <url>
+         <loc>https://tjhon.github.io/PyPeruStats/mef/todo/</loc>
+         <lastmod>2026-04-15</lastmod>
     </url>
 </urlset>

@@ -18,7 +18,7 @@
         <link rel="prev" href="../inei/examples/">
       
       
-        <link rel="next" href="../siaf/">
+        <link rel="next" href="quickstart/">
       
       
         
@@ -82,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#bcrp-time-series" class="md-skip">
+        <a href="#bcrp-central-reserve-bank-of-peru" class="md-skip">
           Skip to content
         </a>
       
@@ -98,8 +98,7 @@
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href=".." title="PyPeruStats" class="md-header__button md-logo" aria-label="PyPeruStats" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <img src="../assets/perustats_logo_gemini.png" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -292,11 +291,11 @@
     
     
       <li class="md-tabs__item">
-        <a href="../siaf/" class="md-tabs__link">
+        <a href="../mef/" class="md-tabs__link">
           
   
   
-  SIAF
+  MEF
 
         </a>
       </li>
@@ -328,8 +327,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href=".." title="PyPeruStats" class="md-nav__button md-logo" aria-label="PyPeruStats" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <img src="../assets/perustats_logo_gemini.png" alt="logo">
 
     </a>
     PyPeruStats
@@ -727,10 +725,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#planned-features" class="md-nav__link">
+  <a href="#what-it-does" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Planned Features
+        What it does
       
     </span>
   </a>
@@ -738,10 +736,43 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#quick-preview" class="md-nav__link">
+  <a href="#architecture-overview" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Quick Preview
+        Architecture overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick example
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#series-code-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Series code format
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pages-in-this-section" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pages in this section
       
     </span>
   </a>
@@ -752,6 +783,174 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation & Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="fetcher/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BCRPDataSeries Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="series/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BCRPSeries Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="metadata/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BCRPMetadata Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="cache/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BCRPCache Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -794,7 +993,7 @@
   <span class="md-ellipsis">
     
   
-    SIAF
+    MEF
   
 
     
@@ -810,7 +1009,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    SIAF
+    MEF
   
 
           </label>
@@ -823,7 +1022,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../siaf/" class="md-nav__link">
+      <a href="../mef/" class="md-nav__link">
         
   
   
@@ -831,6 +1030,202 @@
     
   
     Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mef/quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation & Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mef/scraper/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MEFScraper Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mef/steps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Step Primitives
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mef/buttons/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Button Constants
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mef/config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mef/examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mef/todo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TODO & Roadmap
   
 
     
@@ -878,10 +1273,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#planned-features" class="md-nav__link">
+  <a href="#what-it-does" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Planned Features
+        What it does
       
     </span>
   </a>
@@ -889,10 +1284,43 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#quick-preview" class="md-nav__link">
+  <a href="#architecture-overview" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Quick Preview
+        Architecture overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick example
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#series-code-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Series code format
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pages-in-this-section" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pages in this section
       
     </span>
   </a>
@@ -919,41 +1347,135 @@
   
 
 
-<h1 id="bcrp-time-series">BCRP Time Series<a class="headerlink" href="#bcrp-time-series" title="Permanent link">&para;</a></h1>
-<div class="admonition warning">
-<p class="admonition-title">Documentation in progress</p>
-<p>This page is a placeholder. Full documentation for <code>perustats.bcrp</code> will be added when the source code is finalized.</p>
-</div>
-<p>The <code>perustats.bcrp</code> module retrieves time-series data from the <strong>Banco Central de Reserva del Perú (BCRP)</strong> statistical portal.</p>
+<h1 id="bcrp-central-reserve-bank-of-peru">BCRP — Central Reserve Bank of Peru<a class="headerlink" href="#bcrp-central-reserve-bank-of-peru" title="Permanent link">&para;</a></h1>
+<p>The <code>BCRP</code> module lets you download, cache, and work with <strong>any time-series published by the Peruvian Central Reserve Bank</strong> through its public statistics API.</p>
 <hr />
-<h2 id="planned-features">Planned Features<a class="headerlink" href="#planned-features" title="Permanent link">&para;</a></h2>
-<ul>
-<li>Retrieval of daily, monthly, quarterly, and annual series by code.</li>
-<li>Automatic parsing of BCRP's non-standard Spanish date formats (<code>"Ene05"</code>, <code>"T113"</code>, <code>"31Ene05"</code> …).</li>
-<li>Parallel processing of multiple series codes.</li>
-<li>Built-in SQLite caching.</li>
-<li>Output as tidy <code>pandas</code> DataFrames keyed by frequency (<code>"D"</code>, <code>"M"</code>, <code>"Q"</code>, <code>"A"</code>).</li>
-</ul>
+<h2 id="what-it-does">What it does<a class="headerlink" href="#what-it-does" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Fetch data</strong></td>
+<td>Pulls one or many series in a single HTTP call</td>
+</tr>
+<tr>
+<td><strong>Multi-frequency</strong></td>
+<td>Daily (<code>D</code>), Monthly (<code>M</code>), Quarterly (<code>Q</code>), Annual (<code>A</code>)</td>
+</tr>
+<tr>
+<td><strong>Metadata validation</strong></td>
+<td>Warns about unknown codes <em>before</em> making any API request</td>
+</tr>
+<tr>
+<td><strong>SQLite caching</strong></td>
+<td>Re-running with the same parameters hits the local cache, not the network</td>
+</tr>
+<tr>
+<td><strong>Pandas-ready</strong></td>
+<td>Returns tidy <code>DataFrame</code> objects with a <code>datetime</code> index</td>
+</tr>
+</tbody>
+</table>
 <hr />
-<h2 id="quick-preview">Quick Preview<a class="headerlink" href="#quick-preview" title="Permanent link">&para;</a></h2>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">perustats</span><span class="w"> </span><span class="kn">import</span> <span class="n">BCRPDataProcessor</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">processor</span> <span class="o">=</span> <span class="n">BCRPDataProcessor</span><span class="p">(</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">series</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;PD38032DD&quot;</span><span class="p">,</span> <span class="s2">&quot;RD38085BM&quot;</span><span class="p">,</span> <span class="s2">&quot;PD37940PQ&quot;</span><span class="p">],</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">start_date</span><span class="o">=</span><span class="s2">&quot;2005-01-01&quot;</span><span class="p">,</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">end_date</span><span class="o">=</span><span class="s2">&quot;2023-12-31&quot;</span><span class="p">,</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">)</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="n">data</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">process_data</span><span class="p">(</span><span class="n">save_sqlite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="n">daily_df</span>     <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;D&quot;</span><span class="p">)</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="n">monthly_df</span>   <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;M&quot;</span><span class="p">)</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="n">quarterly_df</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Q&quot;</span><span class="p">)</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="n">annual_df</span>    <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">)</span>
+<h2 id="architecture-overview">Architecture overview<a class="headerlink" href="#architecture-overview" title="Permanent link">&para;</a></h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>BCRPSeries          ← define your query (codes + date range)
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    │
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    ▼
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>BCRPDataSeries      ← orchestrates fetch, cache, and date parsing
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    ├── BCRPMetadata   validates codes against the scraped catalogue
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    └── BCRPCache      reads / writes the SQLite cache
 </span></code></pre></div>
 <hr />
-<p>Check back soon for the full API reference.</p>
+<h2 id="quick-example">Quick example<a class="headerlink" href="#quick-example" title="Permanent link">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">perustats.BCRP.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">BCRPSeries</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">perustats.BCRP.fetcher</span><span class="w"> </span><span class="kn">import</span> <span class="n">BCRPDataSeries</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">series</span> <span class="o">=</span> <span class="n">BCRPSeries</span><span class="p">(</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">codes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;RD16085DA&quot;</span><span class="p">,</span> <span class="s2">&quot;PD04657MD&quot;</span><span class="p">,</span> <span class="s2">&quot;RD14266DQ&quot;</span><span class="p">],</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">start_date</span><span class="o">=</span><span class="s2">&quot;2015-01-01&quot;</span><span class="p">,</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">end_date</span><span class="o">=</span><span class="s2">&quot;2024-12-31&quot;</span><span class="p">,</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="p">)</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="n">result</span> <span class="o">=</span> <span class="n">BCRPDataSeries</span><span class="p">(</span><span class="n">series</span><span class="p">)</span><span class="o">.</span><span class="n">fetch_data</span><span class="p">()</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="c1"># result.result is a dict keyed by frequency</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="n">daily_df</span>     <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;D&quot;</span><span class="p">]</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="n">monthly_df</span>   <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;M&quot;</span><span class="p">]</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="n">quarterly_df</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;Q&quot;</span><span class="p">]</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="nb">print</span><span class="p">(</span><span class="n">daily_df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+</span></code></pre></div>
+<hr />
+<h2 id="series-code-format">Series code format<a class="headerlink" href="#series-code-format" title="Permanent link">&para;</a></h2>
+<p>Every BCRP series code encodes its own frequency in the <strong>last character</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Suffix</th>
+<th>Frequency</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>D</code></td>
+<td>Daily</td>
+</tr>
+<tr>
+<td><code>M</code></td>
+<td>Monthly</td>
+</tr>
+<tr>
+<td><code>Q</code></td>
+<td>Quarterly</td>
+</tr>
+<tr>
+<td><code>A</code></td>
+<td>Annual</td>
+</tr>
+</tbody>
+</table>
+<p>Example: <code>RD16085D**A**</code> → annual series. The library reads this suffix automatically and routes each code to the correct API endpoint and date format.</p>
+<hr />
+<h2 id="pages-in-this-section">Pages in this section<a class="headerlink" href="#pages-in-this-section" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="quickstart/">Quickstart</a></td>
+<td>Installation and a working end-to-end example</td>
+</tr>
+<tr>
+<td><a href="fetcher/">BCRPDataSeries</a></td>
+<td>Full API reference for the main fetcher class</td>
+</tr>
+<tr>
+<td><a href="series/">BCRPSeries model</a></td>
+<td>Query model — codes, date range, and frequency grouping</td>
+</tr>
+<tr>
+<td><a href="metadata/">BCRPMetadata</a></td>
+<td>Catalogue management and code search</td>
+</tr>
+<tr>
+<td><a href="cache/">BCRPCache</a></td>
+<td>SQLite cache internals</td>
+</tr>
+<tr>
+<td><a href="examples/">Examples</a></td>
+<td>Real-world usage patterns</td>
+</tr>
+</tbody>
+</table>
 
 
 
