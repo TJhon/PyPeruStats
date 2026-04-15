@@ -1,3 +1,5 @@
+"columnas presentes para distintsa version del apx"
+
 # Gastos
 COLUMNS_GASTO_V4 = [
     "codigo_grp",

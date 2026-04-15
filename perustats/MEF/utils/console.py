@@ -1,3 +1,5 @@
+"obtiene en que entorno se esta ejecutando"
+
 from rich.console import Console
 
 

@@ -1,3 +1,5 @@
+"manejo de tablas"
+
 import re
 
 import pandas as pd
@@ -11,6 +13,7 @@ def filter_content(df: pd.DataFrame, rows=[]) -> pd.DataFrame:
     if rows and rows is not None:
         pattern = "|".join(map(re.escape, rows))
         df = df[df["concepto_region"].str.contains(pattern, case=False, na=False)]
+        df = df.reset_index()
     return df
 
 

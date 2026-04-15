@@ -1,41 +1,60 @@
-"""
-MEF Scraper - Sistema unificado de scraping para SIAF MEF
+from perustats.MEF.constants import buttons as BTN
+from perustats.MEF.steps.click import ClickBtn, Rows, Search
 
-Extrae datos de ingresos y gastos del Sistema Integrado de Administración Financiera
-del Ministerio de Economía y Finanzas del Perú.
+from .scrapper import MEFScraper
 
-Uso básico:
-    from mef_scraper import MEFScraper
+if __name__ == "__main__":
+    from rich import print
 
-    # Para ingresos
-    scraper_ingresos = MEFScraper(tipo='ingreso', master_dir_save='./data/raw/ingresos/')
-    scraper_ingresos.run(year=2010, steps=STEPS_INGRESO)
+    base_inicio = [
+        Rows(["total"]),
+        ClickBtn(BTN.NIVEL_GOBIERNO),
+        Rows(["locales"]),
+    ]
 
-    # Para gastos
-    scraper_gastos = MEFScraper(tipo='gasto', master_dir_save='./data/raw/gastos/')
-    scraper_gastos.run(year=2010, steps=STEPS_GASTO)
-"""
+    bloque_mancomunidades = [
+        ClickBtn(BTN.GOB_LOCALES_MANCOMUNIDADES, as_column=False),
+        Rows(["municipal"]),
+    ]
 
-from .constants import detect_version, get_config
-from .scraper import MEFScraper
-from .step import SearchTextStep, Step
-from .utils import (
-    extract_states,
-    find_row_by_text,
-    get_grp_from_row,
-    html_table_to_dataframe,
-    save_dataframe,
-)
+    bloque_final = [
+        ClickBtn(BTN.GENERICA),
+        Rows(["deuda publica", "bienes y servicios"]),
+        ClickBtn(BTN.DEPARTAMENTO),
+        Rows(["ancash", "lima"]),
+        ClickBtn(BTN.MUNICIPALIDAD),
+    ]
 
-__all__ = [
-    "MEFScraper",
-    "get_config",
-    "detect_version",
-    "extract_states",
-    "html_table_to_dataframe",
-    "find_row_by_text",
-    "get_grp_from_row",
-    "save_dataframe",
-    "Step",
-    "SearchTextStep",
-]
+    stp1 = base_inicio + bloque_mancomunidades + bloque_final
+    stp3 = base_inicio + bloque_final
+
+    r = MEFScraper(stp1, convert_numeric=False).run(2020)
+
+    # # print("--------------====================\n\n")
+    print(r.result)
+
+    r = MEFScraper(stp3, convert_numeric=False).run(2010)
+
+    print(r.result)
+
+    """anterior -> flujo corto"""
+
+    # print(r.config)
+    # s = r.initial_session
+    # print(s)
+
+    stp2 = [
+        Rows(["total"]),
+        ClickBtn(BTN.CATEGORIA_PRESUPUESTAL),
+        Search("poblacion"),
+        Rows(["edu"]),
+        ClickBtn(BTN.NIVEL_GOBIERNO),
+        Rows(["locales"]),
+        ClickBtn(BTN.GOB_LOCALES_MANCOMUNIDADES),
+        Rows(),
+        ClickBtn(BTN.DEPARTAMENTO),
+    ]
+    slc = MEFScraper(stp2)
+    print(slc.steps)
+    r = slc.run(2020)
+    print(r.result)

@@ -1,3 +1,5 @@
+"referencia de url para la consulta de gasto e ingresos"
+
 # Gastos
 GASTO_URL_V4 = (
     "https://apps5.mineco.gob.pe/transparencia/mensual/Navegar_4.aspx?y={year}&ap={ap}"

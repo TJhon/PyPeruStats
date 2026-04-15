@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 
-from perustats.MEF.v2.constants import buttons as btn
-from perustats.MEF.v2.steps.click import ClickBtn, Rows, SavePartial, Search
+from perustats.MEF.constants import buttons as btn
+from perustats.MEF.steps.click import ClickBtn, Rows, SavePartial, Search
 
 STEPS = ClickBtn | Rows | SavePartial | Search
 
@@ -18,6 +18,10 @@ class Step:
 
 @dataclass
 class Workflow:
+    """
+    helper: permite ordenar los pasos entendibles para el debugeo (para el desarrollador)
+    """
+
     steps: list = field(default_factory=list)
 
     def __post_init__(self):

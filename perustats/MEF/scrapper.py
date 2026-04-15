@@ -1,20 +1,21 @@
 from pathlib import Path
-from typing import Literal
+from typing import List, Literal
 
+import pandas as pd
 from rich import print
 
-from perustats.MEF.v2.constants.config import Config, get_config
-from perustats.MEF.v2.steps.click import Search
-from perustats.MEF.v2.steps.workflow import Step, Workflow
-from perustats.MEF.v2.utils.html import has_search_panel
-from perustats.MEF.v2.utils.http import (
+from perustats.MEF.constants.config import Config, get_config
+from perustats.MEF.steps.click import Search
+from perustats.MEF.steps.workflow import Workflow
+from perustats.MEF.utils.html import STATESHTML, has_search_panel
+from perustats.MEF.utils.http import (
     build_payload,
     build_search_payload,
     init_session,
     post_info,
 )
-from perustats.MEF.v2.utils.parse_file import filename_save
-from perustats.MEF.v2.utils.tables import filter_content, get_grp_from_row
+from perustats.MEF.utils.parse_file import filename_save
+from perustats.MEF.utils.tables import filter_content
 
 print
 post_info
@@ -50,7 +51,7 @@ class MEFScraper:
         self.button_labels = None
         self.save_dir = None
 
-    def _do_post(self, soup, state, grp, click_bttn, extras=None):
+    def _do_post(self, soup, state: STATESHTML, grp, click_bttn, extras=None):
         payload = build_payload(
             soup=soup,
             year=self.year,
@@ -61,11 +62,13 @@ class MEFScraper:
             tipo=self.tipo,
             act_proy=self.act_proy,
         )
-        print(payload)
+        # print(payload)
 
-        return post_info(
+        result = post_info(
             self.initial_session.session, self.config.url, payload, self.config.columns
         )
+        # print(result.df)
+        return result
 
     def _already_saved(self, name_col, value):
         if name_col is None:
@@ -83,16 +86,21 @@ class MEFScraper:
         soup = initial_config.soup
         df = initial_config.df
         # session = initial_config.session
-        result = self._process_steps(
-            soup=soup, step_idx=0, state=initial_states, df=df, metadata={"year": year}
+        result = self._proces_step(
+            step_idx=0,
+            df=df,
+            state=initial_states,
+            soup=soup,
+            metadata={"year": [year]},
         )
-        self.result = result
+        self.result = pd.concat(result)
+
         return self
 
     def _execute_search_step(self, soup, state, df, post_step: Search):
         """ejecuta esto cuando tengo un Step y Search diferente a None"""
         if not has_search_panel(soup):
-            return state, df, soup  # <-- ojo: orden distinto al original*
+            return soup, state, df
 
         search_payload = build_search_payload(
             soup,
@@ -104,69 +112,100 @@ class MEFScraper:
             act_proy=self.act_proy,
         )
         try:
-            new_states, new_df, new_soup = post_info(
-                self.session, self.url, search_payload, self.cols, updated=True
+            result = post_info(
+                self.initial_session.session,
+                self.config.url,
+                search_payload,
+                self.config.columns,
             )
+            new_soup = result.soup
+            new_states = result.states
+            new_df = result.df
         except Exception:
             raise
 
         return new_soup, new_states, new_df
 
-    def _process_steps(self, soup, step_idx, state, df, metadata):
+    def _proces_step(
+        self,
+        soup,
+        step_idx: int,
+        state: STATESHTML,
+        df: pd.DataFrame,
+        metadata: dict,
+    ) -> List[pd.DataFrame]:
 
         steps = self.steps
-
-        step: Step = steps[step_idx]
-        print(step)
         is_final = step_idx + 1 == len(steps)
+        columns = self.config.columns
 
-        df = filter_content(df, step.rows.rows)
+        if step_idx >= len(steps):
+            return []
 
-        result_data = []
+        step = steps[step_idx]
 
-        for i, _ in df.iterrows():
-            grp_row = get_grp_from_row(df, i)
-            result = self._do_post(soup, state, grp_row, step.click.button)
+        name_col = None
+
+        as_col = step.click.as_column
+        if as_col and step_idx >= 1:
+            name_col = steps[step_idx - 1].click.name
+
+        click_bttn = step.click.button
+        text_search = step.rows.rows
+
+        should_save = step.save is not None
+        post_step = step.search
+
+        extras_params = {}
+
+        # print(step)
+        df_filtered = filter_content(df, text_search)
+        results = []
+
+        for i, row in df_filtered.iterrows():
+            grp = row.get(columns[0])
+            current_meta = metadata.copy()
+            current_value = row.get(columns[1])
+
+            if name_col:
+                current_meta[name_col] = [current_value]
+
+            result_post = self._do_post(
+                soup=soup,
+                state=state,
+                grp=grp,
+                click_bttn=click_bttn,
+                extras=extras_params,
+            )
+            child_df = result_post.df
+            child_soup = result_post.soup
+            child_states = result_post.states
+
+            if post_step is not None:
+                child_soup, child_states, child_df = self._execute_search_step(
+                    child_soup, child_states, child_df, post_step
+                )
+
             if is_final:
-                result_data.append(result.df)
+                last_name = step.click.name
+                meta_df = pd.DataFrame(current_meta)
+                child_df = (
+                    child_df.assign(**meta_df.iloc[0].to_dict())
+                    .drop(columns=[columns[0]])
+                    .rename(columns={columns[1]: last_name})
+                )
 
-        if is_final:
-            print(result_data)
-            return
-
-        self._process_steps(soup, step_idx + 1, state, df, metadata)
-        # # name_col = "step.name"
-        # name_col = random.randint(1, 10)
-        # name_col = f"c_{name_col}"
-
-        # rows = step.rows.rows
-        # button_id = step.click.button
-
-        # df = filter_content(df, rows=rows)
-
-        # all_data = []
-
-        # for i, _ in df.iterrows():
-        #     current_value = df.iloc[i][self.config.columns[1]]
-        #     current_meta = update_meta(metadata.copy(), i)
-
-        #     # todo: aqui modificar el nombre
-        #     if step.save and self._already_saved(name_col, current_value):
-        #         continue
-        #     try:
-        #         new_states, new_df, new_soup = self._do_post(
-        #             soup, state, get_grp_from_row(df, i), button_id
-        #         )
-        #     except Exception:
-        #         continue
-
-        #     if is_final:
-        #         new_df = new_df.assign(**pd.DataFrame(current_meta).iloc[0].to_dict())
-        #         all_data.append(new_df)
-        #     else:
-        #         all_data.extend(recurse(new_soup, new_states, new_df, current_meta))
-
-        # return all_data
+                results.append(child_df)
+            else:
+                child = self._proces_step(
+                    soup=child_soup,
+                    step_idx=step_idx + 1,
+                    state=child_states,
+                    df=child_df,
+                    metadata=current_meta,
+                )
+                results.extend(child)
+        return results
 
     def _setup_year(
         self,
@@ -190,6 +229,7 @@ class MEFScraper:
         self.initial_session = initial_session
         # obtnemos la metadata configurada para ese anio
         self.config = Config(range(1, 2), url, config.columns)
+        self.year = year
         # Directorio específico del año
         self.save_dir = self.master_dir_save / self.tipo / str(year)
         self.save_dir.mkdir(parents=True, exist_ok=True)

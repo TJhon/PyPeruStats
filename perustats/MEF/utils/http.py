@@ -1,11 +1,15 @@
+"""
+utilities para hacer las peticiones al backend
+"""
+
 from dataclasses import dataclass
 
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
-from perustats.MEF.v2.utils.html import STATESHTML, extract_states, get_button_label
-from perustats.MEF.v2.utils.tables import html_table_to_dataframe
+from perustats.MEF.utils.html import STATESHTML, extract_states, get_button_label
+from perustats.MEF.utils.tables import html_table_to_dataframe
 
 
 def build_search_payload(
@@ -48,7 +52,8 @@ def build_search_payload(
         "__LASTFOCUS": "",
         "__EVENTTARGET": event_target,
         "__EVENTARGUMENT": "",
-        **state,
+        "__VIEWSTATE": state._view_state,
+        "__EVENTVALIDATION": state._event_validation,
         "ctl00$CPH1$DrpYear": str(year),
         "ctl00$CPH1$TxtSearch": search_query,
         "__ASYNCPOST": True,

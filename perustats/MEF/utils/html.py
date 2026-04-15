@@ -1,8 +1,10 @@
+"utils para manejar tablas"
+
 from dataclasses import dataclass
 
 from bs4 import BeautifulSoup
 
-print("asv")
+# print("asv")
 
 
 @dataclass
@@ -27,6 +29,7 @@ class STATESHTML:
 
 
 def get_button_label(soup: BeautifulSoup, id_button_label: str) -> str:
+    # print(id_button_label)
     label = soup.find("input", {"name": id_button_label})
     button_label = label.get("value")
     if button_label is not None:

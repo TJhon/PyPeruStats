@@ -1,3 +1,5 @@
+"generales"
+
 from dataclasses import dataclass
 from typing import List, Literal
 
