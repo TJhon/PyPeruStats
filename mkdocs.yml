@@ -8,6 +8,7 @@ edit_uri: edit/main/docs/
 
 theme:
   name: material
+  logo: assets/perustats_logo_gemini.png
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
@@ -84,8 +85,15 @@ nav:
       - BCRPMetadata Reference: bcrp/metadata.md
       - BCRPCache Reference: bcrp/cache.md
       - Examples: bcrp/examples.md
-  - SIAF:
-      - Overview: siaf/index.md
+  - MEF:
+      - Overview: mef/index.md
+      - Installation & Quickstart: mef/quickstart.md
+      - MEFScraper Reference: mef/scraper.md
+      - Step Primitives: mef/steps.md
+      - Button Constants: mef/buttons.md
+      - Configuration: mef/config.md
+      - Examples: mef/examples.md
+      - TODO & Roadmap: mef/todo.md
 
 extra:
   social:

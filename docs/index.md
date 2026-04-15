@@ -2,6 +2,10 @@
 
 **Python tools to download and process public datasets from Peru.**
 
+<p align="center">
+  <img src="assets/perustats_logo_gemini.png" width="30%">
+</p>
+
 PeruStats provides a unified, developer-friendly interface to Peru's main public data portals — scraping, caching, and organizing microdata so you can focus on analysis instead of plumbing.
 
 ```bash
@@ -16,7 +20,7 @@ pip install perustats
 | ---------------- | ------------------------------------------------------------------- | -------------- |
 | `perustats.inei` | INEI — National microdata surveys (ENAHO, ENDES, ENAPRES, RENAMU …) | ✅ Available   |
 | `perustats.bcrp` | BCRP — Central Bank time series                                     | ✅ Available   |
-| `perustats.siaf` | MEF/SIAF — Public expenditure data                                  | 🚧 Coming soon |
+| `perustats.MEF`  | MEF/SIAF — Public expenditure data                                  | 🚧 Coming soon |
 
 ---
 
@@ -70,17 +74,25 @@ for freq in data.result.keys():
 
 ```
 
----
+### Consulta Amigable
 
-## License
+```py
+from perustats import MEFScraper
+from perustats.MEF.constants import buttons as BTN
+from perustats.MEF.steps.click import ClickBtn, Rows
 
-PeruStats is released under the **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)** license.
+steps = [
+    Rows(["total"]),
+    ClickBtn(BTN.NIVEL_GOBIERNO),
+    Rows(["locales"]),
+    ClickBtn(BTN.GENERICA),
+    Rows(["bienes y servicios"]),
+    ClickBtn(BTN.DEPARTAMENTO),
+]
 
-You are free to use, share, and adapt this software for **non-commercial purposes**, provided you give appropriate credit. Commercial use requires explicit written permission from the author.
-
-[Read the full license →](https://creativecommons.org/licenses/by-nc/4.0/)
-
----
+df = MEFScraper(steps).run(2023).result
+print(df.head())
+```
 
 ## Contributing
 
