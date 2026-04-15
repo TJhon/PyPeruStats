@@ -44,9 +44,7 @@ class BCRPDataSeries:
         self.format_date = format_date
         self.ref_date_formats = REF_DATE_FORMATS
 
-    def fetch_data(
-        self, cache=None, quater_to_timestamp: bool = True, use_code_names=True
-    ) -> "BCRPDataSeries":
+    def fetch_data(self, cache=None) -> "BCRPDataSeries":
         db_name = CACHE_DB if cache is None else cache
         metadata = BCRPMetadata(db_name)
         bcrp_cache = BCRPCache(db_name)
@@ -73,9 +71,7 @@ class BCRPDataSeries:
             if new_codes:
                 data_json = get_data_api(codes, start_date_freq, end_date_freq)
                 df_freq = json_to_df(data_json, codes)
-                df_freq = apply_date_format(
-                    df_freq, frequency=freq, quarter_to_timestamp=quater_to_timestamp
-                )
+                df_freq = apply_date_format(df_freq, frequency=freq)
                 df_freq = df_freq.rename(columns=names_codes)
 
                 df_freq["date"] = df_freq["date"].astype(str)
