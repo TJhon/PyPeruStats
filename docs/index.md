@@ -16,11 +16,11 @@ pip install perustats
 
 ## Data Sources
 
-| Module           | Source                                                              | Status         |
-| ---------------- | ------------------------------------------------------------------- | -------------- |
-| `perustats.inei` | INEI — National microdata surveys (ENAHO, ENDES, ENAPRES, RENAMU …) | ✅ Available   |
-| `perustats.bcrp` | BCRP — Central Bank time series                                     | ✅ Available   |
-| `perustats.MEF`  | MEF/SIAF — Public expenditure data                                  | 🚧 Coming soon |
+| Module           | Source                                                              | Status       |
+| ---------------- | ------------------------------------------------------------------- | ------------ |
+| `perustats.inei` | INEI — National microdata surveys (ENAHO, ENDES, ENAPRES, RENAMU …) | ✅ Available |
+| `perustats.bcrp` | BCRP — Central Bank time series                                     | ✅ Available |
+| `perustats.MEF`  | MEF/SIAF — Public expenditure data                                  | ✅ Available |
 
 ---
 
